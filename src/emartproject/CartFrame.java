@@ -13,17 +13,22 @@ public class CartFrame extends JFrame {
         this.customerName = customerName;
 
         setTitle("Shopping Cart");
-        setSize(600, 400);
+        setSize(760, 480);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
 
         model = new DefaultTableModel(
-            new String[]{"ID", "Product Name", "Price"}, 0
-        );
+            new String[]{"Image", "ID", "Product Name", "Category", "Price ($)"}, 0
+        ) {
+            @Override public boolean isCellEditable(int row, int col) { return false; }
+        };
 
         table = new JTable(model);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        ProductImageManager.decorateProductTable(table);
 
         JLabel totalLabel = new JLabel();
         totalLabel.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -57,7 +62,9 @@ public class CartFrame extends JFrame {
 
             for (Product p : DataStore.cart) {
                 model.addRow(new Object[]{
-                    p.getId(), p.getName(), p.getPrice()
+                    ProductImageManager.getProductIcon(p, 48),
+                    p.getId(), p.getName(), p.getCategory().getLabel(),
+                    String.format("%.2f", p.getPrice())
                 });
             }
 
@@ -78,7 +85,7 @@ public class CartFrame extends JFrame {
                 return;
             }
 
-            DataStore.cart.remove(selected);
+            DataStore.cart.remove(table.convertRowIndexToModel(selected));
             refresh.run();
         });
 
@@ -110,10 +117,7 @@ public class CartFrame extends JFrame {
             new BillFrame(customerName, items.toString(), total);
         });
 
-        backButton.addActionListener(e -> {
-            dispose();
-            new CustomerProductsFrame(customerName, true);
-        });
+        backButton.addActionListener(e -> dispose());
 
         setVisible(true);
     }

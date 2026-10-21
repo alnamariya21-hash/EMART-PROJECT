@@ -15,13 +15,18 @@ public class CustomerProductsFrame extends JPanel {
     this.customerName = customerName;
 
     setLayout(new BorderLayout(10, 10));
+    setBackground(new Color(248, 250, 253));
     setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
     model = new DefaultTableModel(
-        new String[]{"ID", "Product Name", "Price"}, 0
-    );
+        new String[]{"Image", "ID", "Product Name", "Category", "Price ($)"}, 0
+    ) {
+        @Override public boolean isCellEditable(int row, int col) { return false; }
+    };
 
     table = new JTable(model);
+    table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    ProductImageManager.decorateProductTable(table);
     table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
     refreshTable();
 
@@ -37,7 +42,9 @@ public class CustomerProductsFrame extends JPanel {
 
         for (Product p : DataStore.products) {
             model.addRow(new Object[]{
-                p.getId(), p.getName(), p.getPrice()
+                ProductImageManager.getProductIcon(p, 48),
+                p.getId(), p.getName(), p.getCategory().getLabel(),
+                String.format("%.2f", p.getPrice())
             });
         }
     }
@@ -51,7 +58,7 @@ public class CustomerProductsFrame extends JPanel {
             return;
         }
 
-        String id = model.getValueAt(selected, 0).toString();
+        String id = model.getValueAt(table.convertRowIndexToModel(selected), 1).toString();
         Product product = DataStore.findProduct(id);
 
         if (product != null) {

@@ -1,0 +1,25 @@
+name: Java Build
+on:
+  push:
+    branches: [feat/category-product-images]
+  pull_request:
+    branches: [main]
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Compile and package
+        run: bash build.sh
+      - name: Check bundled PNG assets
+        run: |
+          jar tf dist/EMartProject.jar | grep -F 'emartproject/images/electronics.png'
+          jar tf dist/EMartProject.jar | grep -F 'emartproject/images/grocery.png'
+          jar tf dist/EMartProject.jar | grep -F 'emartproject/images/sports.png'
+          jar tf dist/EMartProject.jar | grep -F 'emartproject/images/clothes.png'
+          jar tf dist/EMartProject.jar | grep -F 'emartproject/images/stationery.png'
+          jar tf dist/EMartProject.jar | grep -F 'emartproject/images/others.png'

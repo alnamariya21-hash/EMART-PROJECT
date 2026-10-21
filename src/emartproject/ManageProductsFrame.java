@@ -3,23 +3,31 @@ package emartproject;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class ManageProductsFrame extends JFrame {
 
     DefaultTableModel model;
     JTable table;
     JTextField idField, nameField, priceField;
+    private JComboBox<ProductCategory> categoryBox;
+    private JLabel imagePreview;
+    private JLabel imageHint;
+    private File selectedImageFile;
 
     public ManageProductsFrame() {
         setTitle("E-Mart - Manage Products");
-        setSize(900, 520);
+        setSize(1070, 630);
+        setMinimumSize(new Dimension(850, 560));
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
 
         // Blue header
         JPanel header = new JPanel(new BorderLayout());
-        header.setBackground(new Color(28, 94, 173));
+        header.setBackground(new Color(29, 68, 119));
         header.setBorder(
             BorderFactory.createEmptyBorder(15, 20, 15, 20));
 
@@ -28,6 +36,10 @@ public class ManageProductsFrame extends JFrame {
         title.setFont(new Font("SansSerif", Font.BOLD, 22));
 
         header.add(title, BorderLayout.WEST);
+        JLabel subtitle = new JLabel("  Categories + product images");
+        subtitle.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        subtitle.setForeground(new Color(205, 225, 249));
+        header.add(subtitle, BorderLayout.EAST);
         add(header, BorderLayout.NORTH);
 
         // Main content
@@ -37,14 +49,14 @@ public class ManageProductsFrame extends JFrame {
 
         // Left: Product details form
         JPanel formPanel = new JPanel(new BorderLayout(8, 15));
-        formPanel.setPreferredSize(new Dimension(270, 0));
+        formPanel.setPreferredSize(new Dimension(320, 0));
         formPanel.setBorder(BorderFactory.createTitledBorder(
             BorderFactory.createEtchedBorder(),
             "Product Details"));
 
         JPanel fields = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(8, 5, 8, 5);
+        gbc.insets = new Insets(4, 5, 4, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1.0;
 
@@ -71,6 +83,13 @@ public class ManageProductsFrame extends JFrame {
         gbc.gridy = 5;
         fields.add(priceField, gbc);
 
+        categoryBox = new JComboBox<>(ProductCategory.values());
+        categoryBox.setSelectedItem(ProductCategory.ELECTRONICS);
+        gbc.gridy = 6;
+        fields.add(new JLabel("Category:"), gbc);
+        gbc.gridy = 7;
+        fields.add(categoryBox, gbc);
+
         // Compact buttons
         JButton addButton = new JButton("Add");
         JButton deleteButton = new JButton("Delete");
@@ -85,7 +104,39 @@ public class ManageProductsFrame extends JFrame {
         actionButtons.add(deleteButton);
 
         formPanel.add(fields, BorderLayout.NORTH);
-        formPanel.add(actionButtons, BorderLayout.CENTER);
+
+        JPanel imagePanel = new JPanel(new BorderLayout(8, 5));
+        imagePanel.setBorder(BorderFactory.createTitledBorder("Product Image"));
+        imagePreview = new JLabel();
+        imagePreview.setHorizontalAlignment(SwingConstants.CENTER);
+        imagePreview.setPreferredSize(new Dimension(88, 88));
+        imagePreview.setOpaque(true);
+        imagePreview.setBackground(new Color(239, 246, 253));
+        imagePanel.add(imagePreview, BorderLayout.WEST);
+        JPanel imageActions = new JPanel();
+        imageActions.setLayout(new BoxLayout(imageActions, BoxLayout.Y_AXIS));
+        JButton importButton = new JButton("Import Image...");
+        JButton resetButton = new JButton("Use Category Icon");
+        importButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+        resetButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+        imageHint = new JLabel("Default category icon");
+        imageHint.setAlignmentX(Component.LEFT_ALIGNMENT);
+        imageHint.setFont(new Font("SansSerif", Font.PLAIN, 11));
+        imageActions.add(importButton);
+        imageActions.add(Box.createVerticalStrut(6));
+        imageActions.add(resetButton);
+        imageActions.add(Box.createVerticalStrut(8));
+        imageActions.add(imageHint);
+        imagePanel.add(imageActions, BorderLayout.CENTER);
+        formPanel.add(imagePanel, BorderLayout.CENTER);
+        formPanel.add(actionButtons, BorderLayout.SOUTH);
+
+        categoryBox.addActionListener(e -> updateImagePreview());
+        importButton.addActionListener(e -> chooseImage());
+        resetButton.addActionListener(e -> {
+            selectedImageFile = null;
+            updateImagePreview();
+        });
 
         // Right: Product table
         JPanel tablePanel = new JPanel(new BorderLayout(5, 8));
@@ -94,7 +145,7 @@ public class ManageProductsFrame extends JFrame {
             "Product List"));
 
         model = new DefaultTableModel(
-            new String[]{"ID", "Product Name", "Price"}, 0
+            new String[]{"Image", "ID", "Product Name", "Category", "Price ($)"}, 0
         ) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -103,7 +154,7 @@ public class ManageProductsFrame extends JFrame {
         };
 
         table = new JTable(model);
-        table.setRowHeight(25);
+        ProductImageManager.decorateProductTable(table);
         table.setSelectionMode(
             ListSelectionModel.SINGLE_SELECTION);
         table.setAutoResizeMode(
@@ -132,12 +183,36 @@ public class ManageProductsFrame extends JFrame {
         addButton.addActionListener(e -> addProduct());
         deleteButton.addActionListener(e -> deleteProduct());
 
-        backButton.addActionListener(e -> {
-            dispose();
-            new AdminDashboard();
-        });
-
+        backButton.addActionListener(e -> dispose());
+        updateImagePreview();
         setVisible(true);
+    }
+
+    private void chooseImage() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Choose a product image");
+        chooser.setAcceptAllFileFilterUsed(false);
+        chooser.setFileFilter(new FileNameExtensionFilter(
+            "Images (*.png, *.jpg, *.jpeg, *.gif, *.bmp)",
+            "png", "jpg", "jpeg", "gif", "bmp"));
+        if (chooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) return;
+        File chosen = chooser.getSelectedFile();
+        try {
+            ImageIcon preview = ProductImageManager.preview(chosen, 76);
+            selectedImageFile = chosen;
+            imagePreview.setIcon(preview);
+            imageHint.setText("Custom image selected");
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(),
+                "Cannot open image", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void updateImagePreview() {
+        if (imagePreview == null || selectedImageFile != null) return;
+        imagePreview.setIcon(ProductImageManager.getCategoryIcon(
+            (ProductCategory) categoryBox.getSelectedItem(), 76));
+        imageHint.setText("Default category icon");
     }
 
     private void refreshTable() {
@@ -145,7 +220,9 @@ public class ManageProductsFrame extends JFrame {
 
         for (Product p : DataStore.products) {
             model.addRow(new Object[]{
-                p.getId(), p.getName(), p.getPrice()
+                ProductImageManager.getProductIcon(p, 48),
+                p.getId(), p.getName(), p.getCategory().getLabel(),
+                String.format("%.2f", p.getPrice())
             });
         }
     }
@@ -165,7 +242,7 @@ public class ManageProductsFrame extends JFrame {
 
             double price = Double.parseDouble(priceText);
 
-            if (price < 0) {
+            if (!Double.isFinite(price) || price < 0) {
                 JOptionPane.showMessageDialog(this,
                     "Price cannot be negative.");
                 return;
@@ -177,14 +254,21 @@ public class ManageProductsFrame extends JFrame {
                 return;
             }
 
+            String customPath = null;
+            if (selectedImageFile != null) {
+                customPath = ProductImageManager.importProductImage(selectedImageFile, id);
+            }
             DataStore.products.add(
-                new Product(id, name, price));
+                new Product(id, name, price,
+                    (ProductCategory) categoryBox.getSelectedItem(), customPath));
 
             refreshTable();
 
             idField.setText("");
             nameField.setText("");
             priceField.setText("");
+            selectedImageFile = null;
+            updateImagePreview();
 
             JOptionPane.showMessageDialog(this,
                 "Product added successfully.");
@@ -192,6 +276,9 @@ public class ManageProductsFrame extends JFrame {
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this,
                 "Enter a valid price.");
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(),
+                "Image import failed", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -205,7 +292,7 @@ public class ManageProductsFrame extends JFrame {
         }
 
         String id = model.getValueAt(
-            selected, 0).toString();
+            table.convertRowIndexToModel(selected), 1).toString();
 
         int confirm = JOptionPane.showConfirmDialog(
             this,
