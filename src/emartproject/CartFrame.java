@@ -1,0 +1,120 @@
+package emartproject;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+
+public class CartFrame extends JFrame {
+    DefaultTableModel model;
+    JTable table;
+    String customerName;
+
+    public CartFrame(String customerName) {
+        this.customerName = customerName;
+
+        setTitle("Shopping Cart");
+        setSize(600, 400);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+
+        model = new DefaultTableModel(
+            new String[]{"ID", "Product Name", "Price"}, 0
+        );
+
+        table = new JTable(model);
+
+        JLabel totalLabel = new JLabel();
+        totalLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        totalLabel.setForeground(new Color(0, 150, 0));
+        totalLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
+        totalLabel.setBorder(
+        BorderFactory.createEmptyBorder(10, 10, 10, 20));
+
+        JButton removeButton = new JButton("Remove Item");
+        JButton checkoutButton = new JButton("Checkout");
+        JButton backButton = new JButton("Back");
+
+        JPanel buttons = new JPanel(
+        new FlowLayout(FlowLayout.RIGHT));
+
+        buttons.add(removeButton);
+        buttons.add(checkoutButton);
+        buttons.add(backButton);
+
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.add(totalLabel, BorderLayout.NORTH);
+        bottomPanel.add(buttons, BorderLayout.SOUTH);
+
+        panel.add(new JScrollPane(table), BorderLayout.CENTER);
+        panel.add(bottomPanel, BorderLayout.SOUTH);
+
+        add(panel);
+
+        Runnable refresh = () -> {
+            model.setRowCount(0);
+
+            for (Product p : DataStore.cart) {
+                model.addRow(new Object[]{
+                    p.getId(), p.getName(), p.getPrice()
+                });
+            }
+
+            totalLabel.setText(
+                "Total: $" + String.format("%.2f",
+                    DataStore.getCartTotal())
+            );
+        };
+
+        refresh.run();
+
+        removeButton.addActionListener(e -> {
+            int selected = table.getSelectedRow();
+
+            if (selected == -1) {
+                JOptionPane.showMessageDialog(this,
+                    "Select an item to remove.");
+                return;
+            }
+
+            DataStore.cart.remove(selected);
+            refresh.run();
+        });
+
+        checkoutButton.addActionListener(e -> {
+            if (DataStore.cart.isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                    "Your cart is empty.");
+                return;
+            }
+
+            StringBuilder items = new StringBuilder();
+
+            for (Product p : DataStore.cart) {
+                items.append(p.getName())
+                     .append(" - $")
+                     .append(String.format("%.2f", p.getPrice()))
+                     .append("\n");
+            }
+
+            double total = DataStore.getCartTotal();
+
+            DataStore.sales.add(new String[]{
+                customerName,
+                items.toString().replace("\n", ", "),
+                String.format("%.2f", total)
+            });
+
+            dispose();
+            new BillFrame(customerName, items.toString(), total);
+        });
+
+        backButton.addActionListener(e -> {
+            dispose();
+            new CustomerProductsFrame(customerName, true);
+        });
+
+        setVisible(true);
+    }
+}
