@@ -3,6 +3,7 @@ package emartproject;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.sql.SQLException;
 
 public class CartFrame extends JFrame {
     DefaultTableModel model;
@@ -74,6 +75,8 @@ public class CartFrame extends JFrame {
             );
         };
 
+        try { DataStore.loadCart(); }
+        catch (SQLException ex) { showDatabaseError(ex); }
         refresh.run();
 
         removeButton.addActionListener(e -> {
@@ -85,8 +88,10 @@ public class CartFrame extends JFrame {
                 return;
             }
 
-            DataStore.cart.remove(table.convertRowIndexToModel(selected));
-            refresh.run();
+            try {
+                DataStore.removeCartItem(table.convertRowIndexToModel(selected));
+                refresh.run();
+            } catch (SQLException ex) { showDatabaseError(ex); }
         });
 
         checkoutButton.addActionListener(e -> {
@@ -96,29 +101,19 @@ public class CartFrame extends JFrame {
                 return;
             }
 
-            StringBuilder items = new StringBuilder();
-
-            for (Product p : DataStore.cart) {
-                items.append(p.getName())
-                     .append(" - $")
-                     .append(String.format("%.2f", p.getPrice()))
-                     .append("\n");
-            }
-
-            double total = DataStore.getCartTotal();
-
-            DataStore.sales.add(new String[]{
-                customerName,
-                items.toString().replace("\n", ", "),
-                String.format("%.2f", total)
-            });
-
-            dispose();
-            new BillFrame(customerName, items.toString(), total);
+            try {
+                DataStore.CheckoutReceipt receipt = DataStore.checkout();
+                dispose();
+                new BillFrame(receipt.customer, receipt.items, receipt.total);
+            } catch (SQLException ex) { showDatabaseError(ex); }
         });
 
         backButton.addActionListener(e -> dispose());
 
         setVisible(true);
+    }
+
+    private void showDatabaseError(SQLException e) {
+        JOptionPane.showMessageDialog(this, e.getMessage(), "Database error", JOptionPane.ERROR_MESSAGE);
     }
 }
