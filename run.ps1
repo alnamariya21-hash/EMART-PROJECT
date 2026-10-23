@@ -13,6 +13,9 @@ if (-not (Test-Path $driver)) {
     $url = "https://repo.maven.apache.org/maven2/com/mysql/mysql-connector-j/$driverVersion/mysql-connector-j-$driverVersion.jar"
     Invoke-WebRequest -Uri $url -OutFile $driver -UseBasicParsing
 }
+# Old NetBeans build artifacts include incompatible Java 26 .class files.
+# Clear them before every build so only the selected JDK bytecode is packaged.
+if (Test-Path "build\classes") { Remove-Item "build\classes" -Recurse -Force }
 New-Item -ItemType Directory -Force "build\classes\emartproject\images", "dist" | Out-Null
 & javac -encoding UTF-8 -d "build\classes" (Get-ChildItem "src\emartproject\*.java" | ForEach-Object FullName)
 if ($LASTEXITCODE -ne 0) { throw "Java compilation failed." }
