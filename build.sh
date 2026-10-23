@@ -3,7 +3,11 @@ set -euo pipefail
 cd "$(dirname "$0")"
 driver_version="9.4.0"
 driver="lib/mysql-connector-j-${driver_version}.jar"
-mkdir -p build/classes/emartproject/images dist lib
+mkdir -p dist lib
+# Older NetBeans .class artifacts were committed in this repository (some use Java 26).
+# Always start with an empty output directory to prevent stale bytecode entering the JAR.
+rm -rf build/classes
+mkdir -p build/classes/emartproject/images
 if [ ! -s "$driver" ]; then
   curl -fL --retry 3 "https://repo.maven.apache.org/maven2/com/mysql/mysql-connector-j/${driver_version}/mysql-connector-j-${driver_version}.jar" -o "$driver"
 fi
