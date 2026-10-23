@@ -3,6 +3,7 @@ package emartproject;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.sql.SQLException;
 
 public class CustomerProductsFrame extends JPanel {
     DefaultTableModel model;
@@ -38,6 +39,11 @@ public class CustomerProductsFrame extends JPanel {
     }
 
     private void refreshTable() {
+        try { DataStore.loadProducts(); }
+        catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Database error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
         model.setRowCount(0);
 
         for (Product p : DataStore.products) {
@@ -62,10 +68,12 @@ public class CustomerProductsFrame extends JPanel {
         Product product = DataStore.findProduct(id);
 
         if (product != null) {
-            DataStore.cart.add(product);
-
-            JOptionPane.showMessageDialog(this,
-                product.getName() + " added to cart.");
+            try {
+                DataStore.addToCart(product);
+                JOptionPane.showMessageDialog(this, product.getName() + " added to cart.");
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Database error", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 }

@@ -1,0 +1,12 @@
+# Local dependency download and developer state
+lib/
+*.secret
+*.password
+*.properties.local
+.env
+# IDE and build outputs (older committed build files may remain tracked)
+build/
+dist/
+nbproject/private/
+.idea/
+.vscode/

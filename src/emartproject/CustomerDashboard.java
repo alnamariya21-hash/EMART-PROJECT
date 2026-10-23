@@ -58,9 +58,10 @@ public class CustomerDashboard extends JFrame {
                 e -> new CartFrame(customerName));
 
         logout.addActionListener(e -> {
-                dispose();
-                new LoginFrame();
-    });
+            DataStore.clearSession();
+            dispose();
+            new LoginFrame();
+        });
    
 
         buttons.add(addToCart);

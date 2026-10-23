@@ -3,6 +3,7 @@ package emartproject;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.sql.SQLException;
 
 public class ManageEmployeesFrame extends JFrame {
 
@@ -142,6 +143,8 @@ public class ManageEmployeesFrame extends JFrame {
     }
 
     private void refreshTable() {
+        try { DataStore.loadEmployees(); }
+        catch (SQLException e) { showDatabaseError(e); return; }
         model.setRowCount(0);
 
         for (String[] employee : DataStore.employees) {
@@ -168,8 +171,8 @@ public class ManageEmployeesFrame extends JFrame {
             }
         }
 
-        DataStore.employees.add(
-            new String[]{id, name, role});
+        try { DataStore.addEmployee(id, name, role); }
+        catch (SQLException e) { showDatabaseError(e); return; }
 
         refreshTable();
 
@@ -179,6 +182,11 @@ public class ManageEmployeesFrame extends JFrame {
 
         JOptionPane.showMessageDialog(this,
             "Employee added successfully.");
+    }
+
+    private void showDatabaseError(SQLException e) {
+        JOptionPane.showMessageDialog(this, e.getMessage(),
+            "Database error", JOptionPane.ERROR_MESSAGE);
     }
 
     private void deleteEmployee() {
@@ -200,10 +208,10 @@ public class ManageEmployeesFrame extends JFrame {
             JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
-            DataStore.employees.removeIf(
-                employee -> employee[0].equals(id));
-
-            refreshTable();
+            try {
+                DataStore.deleteEmployee(id);
+                refreshTable();
+            } catch (SQLException e) { showDatabaseError(e); }
         }
     }
 }

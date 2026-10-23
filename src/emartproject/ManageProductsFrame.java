@@ -5,6 +5,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class ManageProductsFrame extends JFrame {
@@ -216,6 +217,8 @@ public class ManageProductsFrame extends JFrame {
     }
 
     private void refreshTable() {
+        try { DataStore.loadProducts(); }
+        catch (SQLException e) { showDatabaseError(e); return; }
         model.setRowCount(0);
 
         for (Product p : DataStore.products) {
@@ -258,7 +261,7 @@ public class ManageProductsFrame extends JFrame {
             if (selectedImageFile != null) {
                 customPath = ProductImageManager.importProductImage(selectedImageFile, id);
             }
-            DataStore.products.add(
+            DataStore.addProduct(
                 new Product(id, name, price,
                     (ProductCategory) categoryBox.getSelectedItem(), customPath));
 
@@ -279,7 +282,14 @@ public class ManageProductsFrame extends JFrame {
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(),
                 "Image import failed", JOptionPane.ERROR_MESSAGE);
+        } catch (SQLException ex) {
+            showDatabaseError(ex);
         }
+    }
+
+    private void showDatabaseError(SQLException e) {
+        JOptionPane.showMessageDialog(this, e.getMessage(),
+            "Database error", JOptionPane.ERROR_MESSAGE);
     }
 
     private void deleteProduct() {
@@ -301,10 +311,10 @@ public class ManageProductsFrame extends JFrame {
             JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
-            DataStore.products.removeIf(
-                p -> p.getId().equals(id));
-
-            refreshTable();
+            try {
+                DataStore.deleteProduct(id);
+                refreshTable();
+            } catch (SQLException ex) { showDatabaseError(ex); }
         }
     }
 }
