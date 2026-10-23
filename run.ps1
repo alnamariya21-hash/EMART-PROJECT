@@ -19,7 +19,7 @@ if ($LASTEXITCODE -ne 0) { throw "Java compilation failed." }
 Copy-Item "src\emartproject\images\*.png" "build\classes\emartproject\images\" -Force
 $manifest = "build\emart-manifest.mf"
 [System.IO.File]::WriteAllText((Join-Path $PSScriptRoot $manifest),
-    "Manifest-Version: 1.0\r\nMain-Class: emartproject.EMartProject\r\nClass-Path: ../lib/mysql-connector-j-$driverVersion.jar\r\n\r\n",
+    "Manifest-Version: 1.0`r`nMain-Class: emartproject.EMartProject`r`nClass-Path: ../lib/mysql-connector-j-$driverVersion.jar`r`n`r`n",
     (New-Object System.Text.UTF8Encoding($false)))
 & jar cfm "dist\EMartProject.jar" $manifest -C "build\classes" .
 if ($LASTEXITCODE -ne 0) { throw "JAR packaging failed." }
