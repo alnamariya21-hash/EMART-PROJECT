@@ -2,6 +2,7 @@ package emartproject;
 
 import javax.swing.*;
 import java.awt.*;
+import java.sql.SQLException;
 
 public class LoginFrame extends JFrame {
     private JTextField usernameField;
@@ -55,6 +56,12 @@ public class LoginFrame extends JFrame {
 
         loginButton.addActionListener(e -> login());
         form.add(loginButton);
+        form.add(Box.createVerticalStrut(10));
+        JButton registerButton = new JButton("Register New Customer");
+        registerButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+        registerButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        registerButton.addActionListener(e -> registerCustomer());
+        form.add(registerButton);
 
         background.add(form);
         add(background);
@@ -79,41 +86,43 @@ public class LoginFrame extends JFrame {
 
     private void login() {
         String username = usernameField.getText().trim();
-        String password =
-                new String(passwordField.getPassword());
+        char[] password = passwordField.getPassword();
         String role = (String) roleBox.getSelectedItem();
-
-        if (username.isEmpty() || password.isEmpty()) {
-            JOptionPane.showMessageDialog(
-                    this, "Please enter username and password.");
+        if (username.isEmpty() || password.length == 0) {
+            JOptionPane.showMessageDialog(this, "Enter username and password.");
+            java.util.Arrays.fill(password, '\0');
             return;
         }
-
-        if ("Admin".equals(role)) {
-            if (username.equals("admin")
-                    && password.equals("admin123")) {
-
-                JOptionPane.showMessageDialog(
-                        this, "Admin Login Successful!");
-
+        try {
+            if (!Database.authenticate(username, password, role)) {
+                JOptionPane.showMessageDialog(this, "Invalid credentials. New customer? Click Register New Customer.");
+                return;
+            }
+            if ("Admin".equals(role)) {
+                DataStore.clearSession();
                 dispose();
                 new AdminDashboard();
-
             } else {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Invalid admin login.\n"
-                        + "Username: admin\n"
-                        + "Password: admin123",
-                        "Login Failed",
-                        JOptionPane.ERROR_MESSAGE);
+                DataStore.selectCustomer(username);
+                dispose();
+                new CustomerDashboard(username);
             }
-        } else {
-            JOptionPane.showMessageDialog(
-                    this, "Welcome to E-Mart, " + username + "!");
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Database error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
 
-            dispose();
-            new CustomerDashboard(username);
+    private void registerCustomer() {
+        String username = usernameField.getText().trim();
+        char[] password = passwordField.getPassword();
+        try {
+            Database.register(username, password, "Customer");
+            JOptionPane.showMessageDialog(this, "Account created! Select Customer and click Login.");
+            roleBox.setSelectedItem("Customer");
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Registration failed", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            java.util.Arrays.fill(password, '\0');
         }
     }
 }
