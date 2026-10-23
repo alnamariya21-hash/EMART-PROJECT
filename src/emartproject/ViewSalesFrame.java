@@ -3,6 +3,7 @@ package emartproject;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.sql.SQLException;
 
 public class ViewSalesFrame extends JFrame {
 
@@ -40,10 +41,7 @@ public class ViewSalesFrame extends JFrame {
 
         refreshButton.addActionListener(e -> refreshTable());
 
-        backButton.addActionListener(e -> {
-            dispose();
-            new AdminDashboard();
-        });
+        backButton.addActionListener(e -> dispose());
 
         JPanel buttons = new JPanel();
         buttons.add(refreshButton);
@@ -54,6 +52,11 @@ public class ViewSalesFrame extends JFrame {
     }
 
     private void refreshTable() {
+        try { DataStore.loadSales(); }
+        catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Database error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
         model.setRowCount(0);
 
         for (String[] sale : DataStore.sales) {
