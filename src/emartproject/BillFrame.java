@@ -26,7 +26,7 @@ public class BillFrame extends JFrame {
                 + "Items: " + items + "\n"
                 + "----------------------------------\n"
                 + String.format("TOTAL: $%.2f\n", total)
-                + "Payment status: Successful\n"
+                + "Payment: Not processed (demo checkout)\n"
                 + "Thank you for shopping!"
         );
 
