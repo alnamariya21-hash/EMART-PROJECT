@@ -7,6 +7,20 @@ $driver = Join-Path $PSScriptRoot ("lib\mysql-connector-j-" + $driverVersion + "
 if (-not (Get-Command javac -ErrorAction SilentlyContinue) -or -not (Get-Command java -ErrorAction SilentlyContinue) -or -not (Get-Command jar -ErrorAction SilentlyContinue)) {
     throw "Java JDK 8 or newer is required. Install a JDK, restart the terminal, then run .\run.bat."
 }
+# Different java.exe and javac.exe versions are common with NetBeans/JDK installations.
+# Compile compatible Java 8 bytecode even if javac is JDK 17/21/26, so Java 8+ can run it.
+$compilerVersion = (& javac -version | Out-String).Trim()
+if ($compilerVersion -match '^javac\s+1\.8') {
+    $compatFlags = @('-source', '8', '-target', '8')
+} elseif ($compilerVersion -match '^javac\s+(\d+)') {
+    if ([int]$Matches[1] -lt 9) {
+        throw "JDK 8 or newer is required. Found: $compilerVersion"
+    }
+    $compatFlags = @('--release', '8')
+} else {
+    throw "Unable to determine the Java compiler version: $compilerVersion"
+}
+Write-Host "Compiler: $compilerVersion (targeting Java 8+ compatible bytecode)"
 if (-not (Test-Path $driver)) {
     New-Item -ItemType Directory -Force (Split-Path $driver) | Out-Null
     Write-Host "Downloading MySQL Connector/J $driverVersion from Maven Central..."
@@ -17,7 +31,7 @@ if (-not (Test-Path $driver)) {
 # Clear them before every build so only the selected JDK bytecode is packaged.
 if (Test-Path "build\classes") { Remove-Item "build\classes" -Recurse -Force }
 New-Item -ItemType Directory -Force "build\classes\emartproject\images", "dist" | Out-Null
-& javac -encoding UTF-8 -d "build\classes" (Get-ChildItem "src\emartproject\*.java" | ForEach-Object FullName)
+& javac @compatFlags -encoding UTF-8 -d "build\classes" (Get-ChildItem "src\emartproject\*.java" | ForEach-Object FullName)
 if ($LASTEXITCODE -ne 0) { throw "Java compilation failed." }
 Copy-Item "src\emartproject\images\*.png" "build\classes\emartproject\images\" -Force
 $manifest = "build\emart-manifest.mf"
