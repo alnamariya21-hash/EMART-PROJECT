@@ -64,24 +64,37 @@ public final class Database {
                 + "id BIGINT AUTO_INCREMENT PRIMARY KEY, customer VARCHAR(64) NOT NULL,"
                 + "items TEXT NOT NULL, total DECIMAL(12,2) NOT NULL,"
                 + "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB");
-            // Only seed a table on first use. Deleted sample rows must stay deleted.
-            try (ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM products")) {
+            st.executeUpdate("CREATE TABLE IF NOT EXISTS app_meta ("
+                + "meta_key VARCHAR(64) PRIMARY KEY, meta_value VARCHAR(255) NOT NULL) ENGINE=InnoDB");
+            boolean seedNeeded;
+            try (ResultSet rs = st.executeQuery(
+                "SELECT COUNT(*) FROM app_meta WHERE meta_key='initial_seed_done'")) {
                 rs.next();
-                if (rs.getLong(1) == 0) {
-                    try (PreparedStatement seed = conn.prepareStatement(
-                        "INSERT INTO products(id,name,price,category) VALUES "
-                      + "('P101','Wireless Mouse',25.00,'ELECTRONICS'),"
-                      + "('P102','Mechanical Keyboard',75.00,'ELECTRONICS'),"
-                      + "('P103','HD Monitor',180.00,'ELECTRONICS')")) { seed.executeUpdate(); }
-                }
+                seedNeeded = rs.getLong(1) == 0;
             }
-            try (ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM employees")) {
-                rs.next();
-                if (rs.getLong(1) == 0) {
-                    try (PreparedStatement seed = conn.prepareStatement(
-                        "INSERT INTO employees(id,name,role) VALUES "
-                      + "('E101','Alex','Sales Assistant'),('E102','Maya','Store Manager')")) { seed.executeUpdate(); }
+            if (seedNeeded) {
+                // Only seed a table on first use. Deleted sample rows must stay deleted.
+                try (ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM products")) {
+                    rs.next();
+                    if (rs.getLong(1) == 0) {
+                        try (PreparedStatement seed = conn.prepareStatement(
+                            "INSERT INTO products(id,name,price,category) VALUES "
+                          + "('P101','Wireless Mouse',25.00,'ELECTRONICS'),"
+                          + "('P102','Mechanical Keyboard',75.00,'ELECTRONICS'),"
+                          + "('P103','HD Monitor',180.00,'ELECTRONICS')")) { seed.executeUpdate(); }
+                    }
                 }
+                try (ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM employees")) {
+                    rs.next();
+                    if (rs.getLong(1) == 0) {
+                        try (PreparedStatement seed = conn.prepareStatement(
+                            "INSERT INTO employees(id,name,role) VALUES "
+                          + "('E101','Alex','Sales Assistant'),('E102','Maya','Store Manager')")) { seed.executeUpdate(); }
+                    }
+                }
+    
+                st.executeUpdate("INSERT INTO app_meta(meta_key,meta_value) VALUES "
+                    + "('initial_seed_done','yes')");
             }
         }
         ensureDefaultAdmin();
