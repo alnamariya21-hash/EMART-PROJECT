@@ -36,22 +36,44 @@ if ($service -and $service.Status -ne 'Running') {
 $settings = Join-Path $env:LOCALAPPDATA "EMart"
 $whoFile = Join-Path $settings "mysql.user"
 $secretFile = Join-Path $settings "mysql.secret"
-if (-not (Test-Path $whoFile) -or -not (Test-Path $secretFile)) {
-    New-Item -ItemType Directory -Force $settings | Out-Null
+New-Item -ItemType Directory -Force $settings | Out-Null
+
+function Save-LocalCredentials {
     $dbUser = Read-Host "Local MySQL username [root]"
     if ([string]::IsNullOrWhiteSpace($dbUser)) { $dbUser = "root" }
     $secret = Read-Host "Local MySQL password" -AsSecureString
     Set-Content -LiteralPath $whoFile -Value $dbUser -Encoding UTF8
     $secret | ConvertFrom-SecureString | Set-Content -LiteralPath $secretFile -Encoding UTF8
 }
-$dbUser = (Get-Content -LiteralPath $whoFile -Raw).Trim()
-$encryptedPassword = (Get-Content -LiteralPath $secretFile -Raw).Trim()
-$secure = ConvertTo-SecureString -String $encryptedPassword
-$ptr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
-try { $dbPassword = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr) }
-finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr) }
-$env:EMART_DB_USER = $dbUser
-$env:EMART_DB_PASSWORD = $dbPassword
+
+if (-not (Test-Path $whoFile) -or -not (Test-Path $secretFile)) {
+    Save-LocalCredentials
+}
+
+$verified = $false
+for ($attempt = 0; $attempt -lt 2; $attempt++) {
+    $dbUser = (Get-Content -LiteralPath $whoFile -Raw).Trim()
+    $encryptedPassword = (Get-Content -LiteralPath $secretFile -Raw).Trim()
+    $secure = ConvertTo-SecureString -String $encryptedPassword
+    $ptr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
+    try { $dbPassword = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr) }
+    finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr) }
+
+    $env:EMART_DB_USER = $dbUser
+    $env:EMART_DB_PASSWORD = $dbPassword
+    & java -cp ("dist\EMartProject.jar;" + $driver) emartproject.DatabaseCheck
+    if ($LASTEXITCODE -eq 0) { $verified = $true; break }
+
+    Write-Warning "MySQL connection failed. Check the MySQL server and saved credentials."
+    Remove-Item Env:EMART_DB_PASSWORD -ErrorAction SilentlyContinue
+    Remove-Item Env:EMART_DB_USER -ErrorAction SilentlyContinue
+    if ($attempt -eq 0) {
+        Save-LocalCredentials
+    }
+}
+if (-not $verified) {
+    throw "Could not connect to MySQL. Ensure the service is running, or correct credentials in the launcher."
+}
 try {
     & java -cp ("dist\EMartProject.jar;" + $driver) emartproject.EMartProject
     if ($LASTEXITCODE -ne 0) { throw "E-Mart exited with code $LASTEXITCODE" }
