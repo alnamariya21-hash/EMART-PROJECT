@@ -64,13 +64,25 @@ public final class Database {
                 + "id BIGINT AUTO_INCREMENT PRIMARY KEY, customer VARCHAR(64) NOT NULL,"
                 + "items TEXT NOT NULL, total DECIMAL(12,2) NOT NULL,"
                 + "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB");
-            // Seed only empty tables so restarting never resets user data.
-            st.executeUpdate("INSERT IGNORE INTO products(id,name,price,category) VALUES "
-                + "('P101','Wireless Mouse',25.00,'ELECTRONICS'),"
-                + "('P102','Mechanical Keyboard',75.00,'ELECTRONICS'),"
-                + "('P103','HD Monitor',180.00,'ELECTRONICS')");
-            st.executeUpdate("INSERT IGNORE INTO employees(id,name,role) VALUES "
-                + "('E101','Alex','Sales Assistant'),('E102','Maya','Store Manager')");
+            // Only seed a table on first use. Deleted sample rows must stay deleted.
+            try (ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM products")) {
+                rs.next();
+                if (rs.getLong(1) == 0) {
+                    try (PreparedStatement seed = conn.prepareStatement(
+                        "INSERT INTO products(id,name,price,category) VALUES "
+                      + "('P101','Wireless Mouse',25.00,'ELECTRONICS'),"
+                      + "('P102','Mechanical Keyboard',75.00,'ELECTRONICS'),"
+                      + "('P103','HD Monitor',180.00,'ELECTRONICS')")) { seed.executeUpdate(); }
+                }
+            }
+            try (ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM employees")) {
+                rs.next();
+                if (rs.getLong(1) == 0) {
+                    try (PreparedStatement seed = conn.prepareStatement(
+                        "INSERT INTO employees(id,name,role) VALUES "
+                      + "('E101','Alex','Sales Assistant'),('E102','Maya','Store Manager')")) { seed.executeUpdate(); }
+                }
+            }
         }
         ensureDefaultAdmin();
     }
@@ -85,7 +97,7 @@ public final class Database {
         try { register("admin", "admin123".toCharArray(), "Admin"); }
         catch (SQLException e) {
             // Pre-existing 'admin' username is a configuration conflict, not a reason to reset credentials.
-            if (!e.getSQLState().startsWith("23")) throw e;
+            if (e.getSQLState() == null || !e.getSQLState().startsWith("23")) throw e;
         }
     }
 
