@@ -11,14 +11,14 @@ import java.util.Enumeration;
  * Apply once, before creating any frames.
  */
 public final class UITheme {
-    public static final Color PRIMARY = new Color(31, 95, 170);
-    public static final Color PRIMARY_DARK = new Color(22, 69, 128);
-    public static final Color ACCENT = new Color(44, 125, 220);
-    public static final Color BACKGROUND = new Color(244, 247, 251);
+    public static final Color PRIMARY = new Color(36, 99, 235);
+    public static final Color PRIMARY_DARK = new Color(15, 29, 54);
+    public static final Color ACCENT = new Color(59, 130, 246);
+    public static final Color BACKGROUND = new Color(15, 29, 54);
     public static final Color SURFACE = Color.WHITE;
     public static final Color TEXT = new Color(37, 48, 63);
     public static final Color MUTED = new Color(102, 115, 132);
-    public static final Color BORDER = new Color(220, 227, 236);
+    public static final Color BORDER = new Color(218, 226, 239);
     public static final Color SUCCESS = new Color(25, 135, 84);
     private static final Font BASE_FONT = new Font("SansSerif", Font.PLAIN, 14);
 
@@ -126,6 +126,7 @@ public final class UITheme {
     }
 
     public static void styleButton(JButton button, boolean primary) {
+        button.setUI(new javax.swing.plaf.basic.BasicButtonUI());
         button.setFont(BASE_FONT.deriveFont(Font.BOLD, 14f));
         button.setFocusPainted(false);
         button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
