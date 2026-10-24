@@ -151,17 +151,30 @@ public class CustomerProductsFrame extends JPanel {
     public void addToCart() {
         Product selectedProduct = null;
 
+        JTable sourceTable = null;
         for (ProductCategory category : ProductCategory.values()) {
-            JTable selectedTable = categoryTables.get(category);
-            int selectedRow = selectedTable.getSelectedRow();
+            JTable candidate = categoryTables.get(category);
+            if (candidate.getSelectedRow() >= 0) {
+                sourceTable = candidate;
+                break;
+            }
+        }
 
-            if (selectedRow >= 0) {
-                DefaultTableModel selectedModel = categoryModels.get(category);
+        if (sourceTable != null) {
+            int selectedRow = sourceTable.getSelectedRow();
+            ProductCategory selectedCategory = null;
+            for (ProductCategory category : ProductCategory.values()) {
+                if (categoryTables.get(category) == sourceTable) {
+                    selectedCategory = category;
+                    break;
+                }
+            }
+            if (selectedCategory != null) {
+                DefaultTableModel selectedModel = categoryModels.get(selectedCategory);
                 String id = selectedModel.getValueAt(
-                    selectedTable.convertRowIndexToModel(selectedRow), 1
+                    sourceTable.convertRowIndexToModel(selectedRow), 1
                 ).toString();
                 selectedProduct = DataStore.findProduct(id);
-                break;
             }
         }
 
@@ -173,6 +186,10 @@ public class CustomerProductsFrame extends JPanel {
 
         try {
             DataStore.addToCart(selectedProduct);
+            // Clear selection in every category so the next add requires a fresh choice.
+            for (JTable categoryTable : categoryTables.values()) {
+                categoryTable.clearSelection();
+            }
             JOptionPane.showMessageDialog(this,
                 selectedProduct.getName() + " added to cart.");
         } catch (SQLException ex) {
