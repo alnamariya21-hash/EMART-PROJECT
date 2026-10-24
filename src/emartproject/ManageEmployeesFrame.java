@@ -134,10 +134,9 @@ public class ManageEmployeesFrame extends JFrame {
         addButton.addActionListener(e -> addEmployee());
         deleteButton.addActionListener(e -> deleteEmployee());
 
-        backButton.addActionListener(e -> {
-            dispose();
-            new AdminDashboard();
-        });
+        // The admin dashboard remains open behind this window.
+        // Close this window instead of creating a duplicate dashboard.
+        backButton.addActionListener(e -> dispose());
 
         setVisible(true);
     }
