@@ -62,6 +62,7 @@ public class AdminDashboard extends JFrame {
 
         add(grid, BorderLayout.CENTER);
 
+        UITheme.polishWindow(this);
         setVisible(true);
     }
 
