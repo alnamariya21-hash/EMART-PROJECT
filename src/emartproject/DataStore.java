@@ -220,8 +220,18 @@ public final class DataStore {
                 }
                 conn.commit();
                 CheckoutReceipt receipt = new CheckoutReceipt(activeCustomer, items.toString(), total.doubleValue());
-                loadCart();
-                loadSales();
+                // The sale is committed. Do not report checkout failure if refreshing
+                // the in-memory cart/sales views fails afterwards.
+                try {
+                    loadCart();
+                } catch (SQLException refreshError) {
+                    receipt.addRefreshWarning("Cart refresh failed: " + refreshError.getMessage());
+                }
+                try {
+                    loadSales();
+                } catch (SQLException refreshError) {
+                    receipt.addRefreshWarning("Sales history refresh failed: " + refreshError.getMessage());
+                }
                 return receipt;
             } catch (SQLException | RuntimeException e) {
                 conn.rollback();
@@ -234,10 +244,21 @@ public final class DataStore {
         public final String customer;
         public final String items;
         public final double total;
+        private String refreshWarning = "";
+
         public CheckoutReceipt(String customer, String items, double total) {
             this.customer = customer;
             this.items = items;
             this.total = total;
+        }
+
+        private void addRefreshWarning(String warning) {
+            if (refreshWarning.isEmpty()) refreshWarning = warning;
+            else refreshWarning += "\\n" + warning;
+        }
+
+        public String getRefreshWarning() {
+            return refreshWarning;
         }
     }
 }
