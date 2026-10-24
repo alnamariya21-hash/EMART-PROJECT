@@ -36,20 +36,29 @@ public final class UITheme {
             // Keep the system's current look and feel if Nimbus is unavailable.
         }
 
-        UIManager.put("control", BACKGROUND);
+        UIManager.put("control", SURFACE);
         UIManager.put("info", SURFACE);
         UIManager.put("nimbusBase", PRIMARY_DARK);
         UIManager.put("nimbusBlueGrey", new Color(224, 232, 242));
         UIManager.put("nimbusLightBackground", SURFACE);
         UIManager.put("text", TEXT);
-        UIManager.put("Panel.background", BACKGROUND);
+        UIManager.put("Panel.background", SURFACE);
         UIManager.put("OptionPane.background", SURFACE);
+        UIManager.put("OptionPane.messageArea.background", SURFACE);
+        UIManager.put("OptionPane.buttonAreaBackground", SURFACE);
+        UIManager.put("OptionPane.foreground", TEXT);
+        UIManager.put("OptionPane.messageForeground", TEXT);
+        UIManager.put("OptionPane.border", BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(BORDER),
+            BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
         UIManager.put("OptionPane.messageFont", new FontUIResource(BASE_FONT));
         UIManager.put("OptionPane.buttonFont", new FontUIResource(BASE_FONT.deriveFont(Font.BOLD)));
         UIManager.put("Label.foreground", TEXT);
         UIManager.put("Label.font", new FontUIResource(BASE_FONT));
         UIManager.put("Button.font", new FontUIResource(BASE_FONT.deriveFont(Font.BOLD)));
         UIManager.put("Button.background", SURFACE);
+        UIManager.put("Button.opaque", Boolean.TRUE);
         UIManager.put("Button.foreground", PRIMARY_DARK);
         UIManager.put("Button.margin", new Insets(9, 16, 9, 16));
         UIManager.put("TextField.font", new FontUIResource(BASE_FONT));
