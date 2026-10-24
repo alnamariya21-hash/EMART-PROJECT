@@ -77,6 +77,7 @@ public class CustomerProductsFrame extends JPanel {
         }
 
         add(new JScrollPane(categoryList), BorderLayout.CENTER);
+        UITheme.styleScrollBars(this);
         refreshTable();
 
         if (standalone) {
