@@ -48,6 +48,7 @@ public class ViewSalesFrame extends JFrame {
         buttons.add(backButton);
 
         add(buttons, BorderLayout.SOUTH);
+        UITheme.polishWindow(this);
         setVisible(true);
     }
 
