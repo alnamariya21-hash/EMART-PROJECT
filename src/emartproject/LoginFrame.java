@@ -18,49 +18,50 @@ public class LoginFrame extends JFrame {
     public LoginFrame() {
         setTitle("E-Mart Login");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setMinimumSize(new Dimension(600, 700));
-        setSize(760, 820);
+        setMinimumSize(new Dimension(620, 680));
+        setSize(700, 740);
         setLocationRelativeTo(null);
         setResizable(false);
 
         JPanel root = new JPanel(new GridBagLayout());
         root.setBackground(PALE);
-        root.setBorder(new EmptyBorder(28, 28, 28, 28));
+        root.setBorder(new EmptyBorder(18, 18, 18, 18));
 
         JPanel card = new JPanel();
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
         card.setBackground(Color.WHITE);
         card.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(new Color(225, 232, 243)),
-            new EmptyBorder(34, 42, 34, 42)
+            new EmptyBorder(28, 34, 28, 34)
         ));
-        card.setPreferredSize(new Dimension(470, 650));
+        card.setPreferredSize(new Dimension(470, 630));
+        card.setMinimumSize(new Dimension(470, 630));
 
-        JPanel brand = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        JPanel brand = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
         brand.setOpaque(false);
-        brand.setAlignmentX(Component.LEFT_ALIGNMENT);
+        brand.setAlignmentX(Component.CENTER_ALIGNMENT);
         JLabel mark = new JLabel("E");
         mark.setOpaque(true);
         mark.setBackground(BLUE);
         mark.setForeground(Color.WHITE);
         mark.setFont(new Font("Segoe UI", Font.BOLD, 25));
         mark.setHorizontalAlignment(SwingConstants.CENTER);
-        mark.setPreferredSize(new Dimension(48, 48));
+        mark.setPreferredSize(new Dimension(52, 48));
         JLabel brandName = new JLabel("  E-MART");
         brandName.setFont(new Font("Segoe UI", Font.BOLD, 23));
         brandName.setForeground(NAVY);
         brand.add(mark);
         brand.add(brandName);
 
-        JLabel title = new JLabel("Welcome back");
+        JLabel title = new JLabel("Welcome back", SwingConstants.CENTER);
         title.setFont(new Font("Segoe UI", Font.BOLD, 29));
         title.setForeground(NAVY);
-        title.setAlignmentX(Component.LEFT_ALIGNMENT);
+        title.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JLabel subtitle = new JLabel("Sign in to continue shopping");
+        JLabel subtitle = new JLabel("Sign in to continue shopping", SwingConstants.CENTER);
         subtitle.setFont(new Font("Segoe UI", Font.PLAIN, 15));
         subtitle.setForeground(MUTED);
-        subtitle.setAlignmentX(Component.LEFT_ALIGNMENT);
+        subtitle.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         usernameField = new JTextField();
         passwordField = new JPasswordField();
@@ -111,8 +112,8 @@ public class LoginFrame extends JFrame {
         JLabel text = new JLabel(label);
         text.setFont(new Font("Segoe UI", Font.BOLD, 15));
         text.setForeground(NAVY);
-        text.setAlignmentX(Component.LEFT_ALIGNMENT);
-        input.setAlignmentX(Component.LEFT_ALIGNMENT);
+        text.setAlignmentX(Component.CENTER_ALIGNMENT);
+        input.setAlignmentX(Component.CENTER_ALIGNMENT);
         panel.add(text);
         panel.add(Box.createVerticalStrut(8));
         panel.add(input);
@@ -123,7 +124,8 @@ public class LoginFrame extends JFrame {
         input.setForeground(NAVY);
         input.setBackground(Color.WHITE);
         input.setPreferredSize(new Dimension(370, 45));
-        input.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
+        input.setMinimumSize(new Dimension(370, 45));
+        input.setMaximumSize(new Dimension(370, 45));
         input.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(new Color(210, 219, 232)),
             new EmptyBorder(8, 11, 8, 11)
@@ -138,8 +140,9 @@ public class LoginFrame extends JFrame {
         button.setForeground(foreground);
         button.setFocusPainted(false);
         button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        button.setAlignmentX(Component.LEFT_ALIGNMENT);
-        button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 48));
+        button.setAlignmentX(Component.CENTER_ALIGNMENT);
+        button.setMinimumSize(new Dimension(370, 48));
+        button.setMaximumSize(new Dimension(370, 48));
         button.setPreferredSize(new Dimension(370, 48));
         button.setBorder(BorderFactory.createEmptyBorder(12, 16, 12, 16));
     }
