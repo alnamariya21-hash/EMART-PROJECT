@@ -12,7 +12,7 @@ public class LoginFrame extends JFrame {
 
     private static final Color NAVY = new Color(20, 37, 68);
     private static final Color BLUE = new Color(39, 100, 210);
-    private static final Color PALE = new Color(242, 246, 252);
+    private static final Color PALE = new Color(15, 29, 54);
     private static final Color MUTED = new Color(105, 119, 140);
 
     public LoginFrame() {
@@ -29,7 +29,10 @@ public class LoginFrame extends JFrame {
         JPanel card = new JPanel();
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
         card.setBackground(Color.WHITE);
-        card.setBorder(new EmptyBorder(34, 42, 34, 42));
+        card.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(225, 232, 243)),
+            new EmptyBorder(34, 42, 34, 42)
+        ));
         card.setPreferredSize(new Dimension(420, 590));
 
         JPanel brand = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
@@ -85,7 +88,7 @@ public class LoginFrame extends JFrame {
 
         card.add(Box.createVerticalStrut(12));
         JButton registerButton = new JButton("Create a Customer Account");
-        styleButton(registerButton, new Color(238, 244, 255), BLUE);
+        styleButton(registerButton, Color.WHITE, BLUE);
         registerButton.setBorder(BorderFactory.createLineBorder(new Color(210, 223, 245)));
         registerButton.addActionListener(e -> new RegisterFrame(this));
         card.add(registerButton);
@@ -127,8 +130,10 @@ public class LoginFrame extends JFrame {
     }
 
     private void styleButton(JButton button, Color background, Color foreground) {
+        button.setUI(new javax.swing.plaf.basic.BasicButtonUI());
         button.setFont(new Font("SansSerif", Font.BOLD, 14));
         button.setBackground(background);
+        button.setOpaque(true);
         button.setForeground(foreground);
         button.setFocusPainted(false);
         button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
