@@ -39,5 +39,12 @@ jobs:
         run: |
           mkdir -p build/test-classes
           javac -encoding UTF-8 -cp "dist/EMartProject.jar:lib/mysql-connector-j-9.4.0.jar" -d build/test-classes tests/DatabaseSmokeTest.java
-      - name: Exercise JDBC persistence and checkout
+      - name: Ensure application bytecode runs on Java 8
+        run: javap -verbose -classpath dist/EMartProject.jar emartproject.DatabaseCheck | grep -F 'major version: 52'
+      - name: Switch to Java 8 for compatibility regression test
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '8'
+      - name: Exercise JDBC persistence and checkout on Java 8
         run: java -cp "build/test-classes:dist/EMartProject.jar:lib/mysql-connector-j-9.4.0.jar" DatabaseSmokeTest
