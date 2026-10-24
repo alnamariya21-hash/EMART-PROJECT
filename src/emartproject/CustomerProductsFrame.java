@@ -4,76 +4,157 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.sql.SQLException;
+import java.util.EnumMap;
+import java.util.Map;
 
 public class CustomerProductsFrame extends JPanel {
     DefaultTableModel model;
     JTable table;
     String customerName;
 
-    public CustomerProductsFrame(
-        String customerName, boolean standalone) {
+    private final Map<ProductCategory, DefaultTableModel> categoryModels =
+        new EnumMap<>(ProductCategory.class);
+    private final Map<ProductCategory, JTable> categoryTables =
+        new EnumMap<>(ProductCategory.class);
+    private final JPanel categoryList = new JPanel();
 
-    this.customerName = customerName;
+    public CustomerProductsFrame(String customerName, boolean standalone) {
+        this.customerName = customerName;
 
-    setLayout(new BorderLayout(10, 10));
-    setBackground(new Color(248, 250, 253));
-    setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        setLayout(new BorderLayout(10, 10));
+        setBackground(new Color(248, 250, 253));
+        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-    model = new DefaultTableModel(
-        new String[]{"Image", "ID", "Product Name", "Category", "Price ($)"}, 0
-    ) {
-        @Override public boolean isCellEditable(int row, int col) { return false; }
-    };
+        categoryList.setLayout(new BoxLayout(categoryList, BoxLayout.Y_AXIS));
+        categoryList.setBackground(new Color(248, 250, 253));
 
-    table = new JTable(model);
-    table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-    ProductImageManager.decorateProductTable(table);
-    table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-    refreshTable();
+        for (ProductCategory category : ProductCategory.values()) {
+            DefaultTableModel categoryModel = new DefaultTableModel(
+                new String[]{"Image", "ID", "Product Name", "Category", "Price ($)"}, 0
+            ) {
+                @Override
+                public boolean isCellEditable(int row, int col) {
+                    return false;
+                }
+            };
 
-    add(new JScrollPane(table), BorderLayout.CENTER);
+            JTable categoryTable = new JTable(categoryModel);
+            categoryTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            categoryTable.setRowHeight(52);
+            categoryTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+            ProductImageManager.decorateProductTable(categoryTable);
 
-        if(standalone){
+            categoryModels.put(category, categoryModel);
+            categoryTables.put(category, categoryTable);
+
+            // Keep the original fields available for compatibility.
+            if (table == null) {
+                table = categoryTable;
+                model = categoryModel;
+            }
+
+            JPanel categoryPanel = new JPanel(new BorderLayout(0, 6));
+            categoryPanel.setBackground(Color.WHITE);
+            categoryPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(220, 228, 238)),
+                BorderFactory.createEmptyBorder(10, 10, 10, 10)
+            ));
+
+            JLabel heading = new JLabel(category.getLabel());
+            heading.setFont(new Font("SansSerif", Font.BOLD, 17));
+            heading.setForeground(new Color(28, 94, 173));
+            categoryPanel.add(heading, BorderLayout.NORTH);
+
+            JScrollPane tableScroll = new JScrollPane(categoryTable);
+            tableScroll.setPreferredSize(new Dimension(850, 120));
+            categoryPanel.add(tableScroll, BorderLayout.CENTER);
+            categoryPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            categoryList.add(categoryPanel);
+            categoryList.add(Box.createVerticalStrut(12));
+        }
+
+        add(new JScrollPane(categoryList), BorderLayout.CENTER);
+        refreshTable();
+
+        if (standalone) {
             setVisible(true);
         }
     }
 
     private void refreshTable() {
-        try { DataStore.loadProducts(); }
-        catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, ex.getMessage(), "Database error", JOptionPane.ERROR_MESSAGE);
+        try {
+            DataStore.loadProducts();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(),
+                "Database error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        model.setRowCount(0);
+
+        for (DefaultTableModel categoryModel : categoryModels.values()) {
+            categoryModel.setRowCount(0);
+        }
 
         for (Product p : DataStore.products) {
-            model.addRow(new Object[]{
-                ProductImageManager.getProductIcon(p, 48),
-                p.getId(), p.getName(), p.getCategory().getLabel(),
-                String.format("%.2f", p.getPrice())
-            });
+            ProductCategory category = p.getCategory();
+            if (category == null) {
+                category = ProductCategory.OTHERS;
+            }
+
+            DefaultTableModel categoryModel = categoryModels.get(category);
+            if (categoryModel != null) {
+                categoryModel.addRow(new Object[]{
+                    ProductImageManager.getProductIcon(p, 48),
+                    p.getId(),
+                    p.getName(),
+                    category.getLabel(),
+                    String.format("%.2f", p.getPrice())
+                });
+            }
         }
+
+        // Size each table to its contents while keeping empty categories visible.
+        for (ProductCategory category : ProductCategory.values()) {
+            JTable categoryTable = categoryTables.get(category);
+            int rows = categoryModels.get(category).getRowCount();
+            categoryTable.setPreferredScrollableViewportSize(
+                new Dimension(850, Math.max(52, (rows * 52) + 2))
+            );
+            categoryTable.revalidate();
+        }
+        categoryList.revalidate();
+        categoryList.repaint();
     }
 
     public void addToCart() {
-        int selected = table.getSelectedRow();
+        Product selectedProduct = null;
 
-        if (selected == -1) {
+        for (ProductCategory category : ProductCategory.values()) {
+            JTable selectedTable = categoryTables.get(category);
+            int selectedRow = selectedTable.getSelectedRow();
+
+            if (selectedRow >= 0) {
+                DefaultTableModel selectedModel = categoryModels.get(category);
+                String id = selectedModel.getValueAt(
+                    selectedTable.convertRowIndexToModel(selectedRow), 1
+                ).toString();
+                selectedProduct = DataStore.findProduct(id);
+                break;
+            }
+        }
+
+        if (selectedProduct == null) {
             JOptionPane.showMessageDialog(this,
-                "Please select a product.");
+                "Please select a product from one of the category tables.");
             return;
         }
 
-        String id = model.getValueAt(table.convertRowIndexToModel(selected), 1).toString();
-        Product product = DataStore.findProduct(id);
-
-        if (product != null) {
-            try {
-                DataStore.addToCart(product);
-                JOptionPane.showMessageDialog(this, product.getName() + " added to cart.");
-            } catch (SQLException ex) {
-                JOptionPane.showMessageDialog(this, ex.getMessage(), "Database error", JOptionPane.ERROR_MESSAGE);
-            }
+        try {
+            DataStore.addToCart(selectedProduct);
+            JOptionPane.showMessageDialog(this,
+                selectedProduct.getName() + " added to cart.");
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(),
+                "Database error", JOptionPane.ERROR_MESSAGE);
         }
     }
 }
