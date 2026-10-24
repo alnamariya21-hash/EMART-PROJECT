@@ -114,6 +114,7 @@ public class CartFrame extends JFrame {
 
         backButton.addActionListener(e -> dispose());
 
+        UITheme.polishWindow(this);
         setVisible(true);
     }
 
