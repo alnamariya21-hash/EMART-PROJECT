@@ -50,6 +50,7 @@ public class BillFrame extends JFrame {
         buttons.add(closeButton);
         add(buttons, BorderLayout.SOUTH);
 
+        UITheme.polishWindow(this);
         setVisible(true);
     }
 }
