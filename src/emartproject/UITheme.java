@@ -151,8 +151,7 @@ public final class UITheme {
             JPanel panel = (JPanel) component;
             Color bg = panel.getBackground();
             // Standard light panels become the same soft background; keep colored headers/cards intact.
-            if (bg == null || bg.equals(Color.WHITE)
-                    || bg.equals(new Color(245, 247, 250))
+            if (bg == null || bg.equals(new Color(245, 247, 250))
                     || bg.equals(new Color(238, 241, 246))
                     || bg.equals(new Color(244, 247, 251))) {
                 panel.setBackground(BACKGROUND);
