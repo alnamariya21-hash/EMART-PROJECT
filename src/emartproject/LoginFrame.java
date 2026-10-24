@@ -6,12 +6,13 @@ import java.sql.SQLException;
 
 public class LoginFrame extends JFrame {
     private JTextField usernameField;
+    private JTextField fullNameField;
     private JPasswordField passwordField;
     private JComboBox<String> roleBox;
 
     public LoginFrame() {
         setTitle("E-Mart Login");
-        setSize(600, 620);
+        setSize(600, 700);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -22,7 +23,7 @@ public class LoginFrame extends JFrame {
         form.setBackground(Color.WHITE);
         form.setBorder(BorderFactory.createEmptyBorder(28, 35, 30, 35));
         form.setLayout(new BoxLayout(form, BoxLayout.Y_AXIS));
-        form.setPreferredSize(new Dimension(430, 470));
+        form.setPreferredSize(new Dimension(430, 560));
 
         JLabel small = new JLabel("Please enter your details");
         small.setFont(new Font("SansSerif", Font.PLAIN, 15));
@@ -30,6 +31,7 @@ public class LoginFrame extends JFrame {
         JLabel title = new JLabel("WELCOME TO E-Mart");
         title.setFont(new Font("SansSerif", Font.BOLD, 27));
 
+        fullNameField = new JTextField();
         usernameField = new JTextField();
         passwordField = new JPasswordField();
         roleBox = new JComboBox<>(new String[]{"Customer", "Admin"});
@@ -38,6 +40,9 @@ public class LoginFrame extends JFrame {
         form.add(Box.createVerticalStrut(12));
         form.add(title);
         form.add(Box.createVerticalStrut(28));
+
+        addField(form, "Full Name (for new customers)", fullNameField);
+        form.add(Box.createVerticalStrut(12));
 
         addField(form, "Username", usernameField);
         form.add(Box.createVerticalStrut(15));
@@ -105,7 +110,7 @@ public class LoginFrame extends JFrame {
             } else {
                 DataStore.selectCustomer(username);
                 dispose();
-                new CustomerDashboard(username);
+                new CustomerDashboard(Database.getFullName(username));
             }
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Database error", JOptionPane.ERROR_MESSAGE);
@@ -116,7 +121,7 @@ public class LoginFrame extends JFrame {
         String username = usernameField.getText().trim();
         char[] password = passwordField.getPassword();
         try {
-            Database.register(username, password, "Customer");
+            Database.register(username, fullNameField.getText().trim(), password, "Customer");
             JOptionPane.showMessageDialog(this, "Account created! Select Customer and click Login.");
             roleBox.setSelectedItem("Customer");
         } catch (SQLException ex) {
