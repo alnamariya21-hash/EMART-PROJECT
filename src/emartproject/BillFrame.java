@@ -7,17 +7,20 @@ public class BillFrame extends JFrame {
 
     public BillFrame(String customerName, String items, double total) {
         setTitle("E-Mart - Bill");
-        setSize(450, 350);
+        setSize(520, 380);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout(10, 10));
 
         JLabel title = new JLabel("E-MART BILL", SwingConstants.CENTER);
         title.setFont(new Font("SansSerif", Font.BOLD, 24));
+        title.setBorder(BorderFactory.createEmptyBorder(12, 10, 8, 10));
         add(title, BorderLayout.NORTH);
 
         JTextArea bill = new JTextArea();
         bill.setEditable(false);
+        bill.setLineWrap(true);
+        bill.setWrapStyleWord(true);
         bill.setFont(new Font("Monospaced", Font.PLAIN, 14));
         bill.setText(
                 "             E-MART STORE\n"
@@ -26,31 +29,20 @@ public class BillFrame extends JFrame {
                 + "Items: " + items + "\n"
                 + "----------------------------------\n"
                 + String.format("TOTAL: $%.2f\n", total)
-                + "Payment: Not processed (demo checkout)\n"
+                + "Checkout recorded successfully.\n"
                 + "Thank you for shopping!"
         );
 
         bill.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
         add(new JScrollPane(bill), BorderLayout.CENTER);
 
-        JButton backButton = new JButton("Back to Cart");
-        JButton closeButton = new JButton("Close");
+        JButton closeButton = new JButton("Return to Store");
+        closeButton.addActionListener(e -> dispose());
 
-        backButton.addActionListener(e -> {
-            dispose();
-            new CartFrame(customerName);
-        });
-
-        closeButton.addActionListener(e -> {
-            dispose();
-            new CustomerDashboard(customerName);
-        });
-
-        JPanel buttons = new JPanel();
-        buttons.add(backButton);
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.CENTER));
         buttons.add(closeButton);
-
         add(buttons, BorderLayout.SOUTH);
+
         setVisible(true);
     }
 }
