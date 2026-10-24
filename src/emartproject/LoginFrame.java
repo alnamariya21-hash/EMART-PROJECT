@@ -115,6 +115,7 @@ public class LoginFrame extends JFrame {
         text.setHorizontalAlignment(SwingConstants.LEFT);
         text.setAlignmentX(Component.CENTER_ALIGNMENT);
         text.setPreferredSize(new Dimension(370, 22));
+        text.setMinimumSize(new Dimension(370, 22));
         text.setMaximumSize(new Dimension(370, 22));
         input.setAlignmentX(Component.CENTER_ALIGNMENT);
         panel.add(text);
