@@ -47,6 +47,7 @@ public final class Database {
             st.executeUpdate("CREATE TABLE IF NOT EXISTS users ("
                 + "username VARCHAR(64) PRIMARY KEY, role VARCHAR(12) NOT NULL,"
                 + "password_salt VARCHAR(64) NOT NULL, password_hash VARCHAR(128) NOT NULL,"
+                + "full_name VARCHAR(120) NOT NULL DEFAULT '',"
                 + "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB");
             st.executeUpdate("CREATE TABLE IF NOT EXISTS products ("
                 + "id VARCHAR(40) PRIMARY KEY, name VARCHAR(200) NOT NULL,"
@@ -134,6 +135,20 @@ public final class Database {
             ps.setString(4, hash);
             ps.executeUpdate();
         }
+    }
+
+    public static String getFullName(String username) throws SQLException {
+        try (Connection conn = connect();
+             PreparedStatement ps = conn.prepareStatement("SELECT full_name FROM users WHERE username=?")) {
+            ps.setString(1, username);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    String name = rs.getString(1);
+                    if (name != null && !name.trim().isEmpty()) return name.trim();
+                }
+            }
+        }
+        return username;
     }
 
     public static boolean authenticate(String username, char[] rawPassword, String role) throws SQLException {
