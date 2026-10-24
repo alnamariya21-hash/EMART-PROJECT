@@ -137,4 +137,66 @@ public final class UITheme {
         button.setForeground(primary ? Color.WHITE : PRIMARY_DARK);
         button.setOpaque(true);
     }
+
+    /** Apply the shared E-Mart look to a completed screen without changing its layout. */
+    public static void polishWindow(JFrame frame) {
+        frame.getContentPane().setBackground(BACKGROUND);
+        polishComponent(frame.getContentPane());
+        frame.revalidate();
+        frame.repaint();
+    }
+
+    private static void polishComponent(Component component) {
+        if (component instanceof JPanel) {
+            JPanel panel = (JPanel) component;
+            Color bg = panel.getBackground();
+            // Standard light panels become the same soft background; keep colored headers/cards intact.
+            if (bg == null || bg.equals(Color.WHITE)
+                    || bg.equals(new Color(245, 247, 250))
+                    || bg.equals(new Color(238, 241, 246))
+                    || bg.equals(new Color(244, 247, 251))) {
+                panel.setBackground(BACKGROUND);
+            }
+        }
+        if (component instanceof JLabel) {
+            JLabel label = (JLabel) component;
+            Color bg = label.getBackground();
+            // Preserve white text on dark headers and other intentionally colored labels.
+            if (!Color.WHITE.equals(label.getForeground())
+                    && (bg == null || bg.equals(Color.WHITE))) {
+                label.setForeground(TEXT);
+            }
+        }
+        if (component instanceof JButton) {
+            JButton button = (JButton) component;
+            String caption = button.getText() == null ? "" : button.getText().toLowerCase();
+            boolean primary = caption.contains("login") || caption.contains("sign in")
+                    || caption.contains("register") || caption.contains("pay")
+                    || caption.contains("add to cart") || caption.equals("add")
+                    || caption.contains("continue") || caption.contains("checkout");
+            styleButton(button, primary);
+        }
+        if (component instanceof JTextField || component instanceof JPasswordField
+                || component instanceof JComboBox<?>) {
+            JComponent input = (JComponent) component;
+            input.setFont(BASE_FONT);
+            input.setBackground(SURFACE);
+            input.setForeground(TEXT);
+            input.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER),
+                new EmptyBorder(7, 10, 7, 10)
+            ));
+            Dimension preferred = input.getPreferredSize();
+            input.setPreferredSize(new Dimension(Math.max(180, preferred.width), 40));
+        }
+        if (component instanceof JTable) {
+            styleTable((JTable) component);
+        }
+        if (component instanceof Container) {
+            for (Component child : ((Container) component).getComponents()) {
+                polishComponent(child);
+            }
+        }
+    }
+
 }
