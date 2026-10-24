@@ -186,6 +186,7 @@ public class ManageProductsFrame extends JFrame {
 
         backButton.addActionListener(e -> dispose());
         updateImagePreview();
+        UITheme.polishWindow(this);
         setVisible(true);
     }
 
