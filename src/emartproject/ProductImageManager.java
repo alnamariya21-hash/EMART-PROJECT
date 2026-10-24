@@ -92,16 +92,8 @@ public final class ProductImageManager {
     }
 
     public static void decorateProductTable(JTable table) {
+        UITheme.styleTable(table);
         table.setRowHeight(62);
-        table.setShowVerticalLines(false);
-        table.setGridColor(new Color(235, 239, 245));
-        table.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        table.setSelectionBackground(new Color(220, 236, 255));
-        JTableHeader header = table.getTableHeader();
-        header.setFont(new Font("SansSerif", Font.BOLD, 13));
-        header.setBackground(new Color(235, 242, 250));
-        header.setForeground(new Color(36, 64, 103));
-        header.setReorderingAllowed(false);
         table.getColumnModel().getColumn(0).setPreferredWidth(76);
         table.getColumnModel().getColumn(0).setMaxWidth(90);
         table.getColumnModel().getColumn(0).setCellRenderer(new DefaultTableCellRenderer() {
