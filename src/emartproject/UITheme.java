@@ -245,6 +245,62 @@ public final class UITheme {
             Dimension preferred = input.getPreferredSize();
             input.setPreferredSize(new Dimension(Math.max(180, preferred.width), 40));
         }
+        if (component instanceof JScrollBar) {
+            JScrollBar bar = (JScrollBar) component;
+            bar.setUI(new javax.swing.plaf.basic.BasicScrollBarUI() {
+                @Override
+                protected void configureScrollBarColors() {
+                    thumbColor = new Color(36, 99, 235);
+                    thumbDarkShadowColor = new Color(29, 78, 216);
+                    thumbHighlightColor = new Color(96, 165, 250);
+                    trackColor = new Color(241, 245, 249);
+                    trackHighlightColor = new Color(226, 232, 240);
+                }
+
+                @Override
+                protected JButton createDecreaseButton(int orientation) {
+                    return createZeroButton();
+                }
+
+                @Override
+                protected JButton createIncreaseButton(int orientation) {
+                    return createZeroButton();
+                }
+
+                private JButton createZeroButton() {
+                    JButton button = new JButton();
+                    button.setPreferredSize(new Dimension(0, 0));
+                    button.setMinimumSize(new Dimension(0, 0));
+                    button.setMaximumSize(new Dimension(0, 0));
+                    button.setFocusable(false);
+                    button.setBorderPainted(false);
+                    button.setVisible(false);
+                    return button;
+                }
+
+                @Override
+                protected void paintThumb(Graphics g, JComponent c, Rectangle thumbBounds) {
+                    if (thumbBounds.isEmpty() || !scrollbar.isEnabled()) return;
+                    Graphics2D g2 = (Graphics2D) g.create();
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                        RenderingHints.VALUE_ANTIALIAS_ON);
+                    g2.setColor(thumbColor);
+                    g2.fillRoundRect(thumbBounds.x + 2, thumbBounds.y + 2,
+                        Math.max(0, thumbBounds.width - 4),
+                        Math.max(0, thumbBounds.height - 4), 12, 12);
+                    g2.dispose();
+                }
+
+                @Override
+                protected Dimension getMinimumThumbSize() {
+                    return new Dimension(12, 32);
+                }
+            });
+            bar.setPreferredSize(bar.getOrientation() == JScrollBar.VERTICAL
+                ? new Dimension(16, 0) : new Dimension(0, 16));
+            bar.setOpaque(true);
+            bar.setBackground(new Color(241, 245, 249));
+        }
         if (component instanceof JTable) {
             styleTable((JTable) component);
         }
