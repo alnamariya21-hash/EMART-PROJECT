@@ -30,18 +30,23 @@ public class BillFrame extends JFrame {
                 + "Items:\n" + items
                 + "----------------------------------\n"
                 + String.format("TOTAL: $%.2f\n", total)
-                + "Checkout recorded successfully.\n"
-                + "Thank you for shopping!"
+                + "Please proceed to payment."
         );
 
         bill.setCaretPosition(0);
         bill.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
         add(new JScrollPane(bill), BorderLayout.CENTER);
 
+        JButton paymentButton = new JButton("Proceed to Payment");
         JButton closeButton = new JButton("Return to Store");
+
+        paymentButton.addActionListener(e ->
+            new PaymentFrame(customerName, items, total, this)
+        );
         closeButton.addActionListener(e -> dispose());
 
-        JPanel buttons = new JPanel();
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 8));
+        buttons.add(paymentButton);
         buttons.add(closeButton);
         add(buttons, BorderLayout.SOUTH);
 
