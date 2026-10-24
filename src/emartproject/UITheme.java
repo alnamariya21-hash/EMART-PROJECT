@@ -20,7 +20,7 @@ public final class UITheme {
     public static final Color MUTED = new Color(102, 115, 132);
     public static final Color BORDER = new Color(218, 226, 239);
     public static final Color SUCCESS = new Color(25, 135, 84);
-    private static final Font BASE_FONT = new Font("SansSerif", Font.PLAIN, 15);
+    private static final Font BASE_FONT = new Font("Times New Roman", Font.PLAIN, 15);
 
     private UITheme() { }
 
@@ -122,13 +122,13 @@ public final class UITheme {
 
         JLabel heading = new JLabel(title);
         heading.setForeground(Color.WHITE);
-        heading.setFont(new Font("SansSerif", Font.BOLD, 25));
+        heading.setFont(new Font("Times New Roman", Font.BOLD, 25));
         header.add(heading, BorderLayout.WEST);
 
         if (subtitle != null && !subtitle.trim().isEmpty()) {
             JLabel sub = new JLabel(subtitle);
             sub.setForeground(new Color(225, 237, 252));
-            sub.setFont(new Font("SansSerif", Font.PLAIN, 14));
+            sub.setFont(new Font("Times New Roman", Font.PLAIN, 14));
             header.add(sub, BorderLayout.EAST);
         }
         return header;
