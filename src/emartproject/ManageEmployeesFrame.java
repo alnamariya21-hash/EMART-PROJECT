@@ -138,6 +138,7 @@ public class ManageEmployeesFrame extends JFrame {
         // Close this window instead of creating a duplicate dashboard.
         backButton.addActionListener(e -> dispose());
 
+        UITheme.polishWindow(this);
         setVisible(true);
     }
 
