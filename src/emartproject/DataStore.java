@@ -220,8 +220,16 @@ public final class DataStore {
                 }
                 conn.commit();
                 CheckoutReceipt receipt = new CheckoutReceipt(activeCustomer, items.toString(), total.doubleValue());
-                loadCart();
-                loadSales();
+
+                // The sale is already committed. A refresh problem must not make
+                // checkout appear to have failed or encourage a duplicate purchase.
+                try {
+                    loadCart();
+                    loadSales();
+                } catch (SQLException refreshError) {
+                    receipt.refreshWarning = "Your checkout was saved, but the screen could not refresh. "
+                        + "Please reopen the cart or sales view. Details: " + refreshError.getMessage();
+                }
                 return receipt;
             } catch (SQLException | RuntimeException e) {
                 conn.rollback();
@@ -234,6 +242,7 @@ public final class DataStore {
         public final String customer;
         public final String items;
         public final double total;
+        public String refreshWarning;
         public CheckoutReceipt(String customer, String items, double total) {
             this.customer = customer;
             this.items = items;
