@@ -86,6 +86,7 @@ public class ManageProductsFrame extends JFrame {
 
         categoryBox = new JComboBox<>(ProductCategory.values());
         categoryBox.setSelectedItem(ProductCategory.ELECTRONICS);
+        UITheme.styleCategoryComboBox(categoryBox);
         gbc.gridy = 6;
         fields.add(new JLabel("Category:"), gbc);
         gbc.gridy = 7;
