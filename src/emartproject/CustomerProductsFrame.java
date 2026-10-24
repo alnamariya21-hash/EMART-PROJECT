@@ -94,6 +94,13 @@ public class CustomerProductsFrame extends JPanel {
             categoryModel.setRowCount(0);
         }
 
+        // Start by hiding every category; show only categories containing products.
+        for (Component component : categoryList.getComponents()) {
+            if (component instanceof JPanel) {
+                component.setVisible(false);
+            }
+        }
+
         for (Product p : DataStore.products) {
             ProductCategory category = p.getCategory();
             if (category == null) {
@@ -109,6 +116,15 @@ public class CustomerProductsFrame extends JPanel {
                     category.getLabel(),
                     String.format("%.2f", p.getPrice())
                 });
+            }
+        }
+
+        // Show a category panel only when it contains at least one product.
+        for (ProductCategory category : ProductCategory.values()) {
+            JPanel panel = (JPanel) categoryTables.get(category).getParent()
+                .getParent().getParent().getParent();
+            if (categoryModels.get(category).getRowCount() > 0) {
+                panel.setVisible(true);
             }
         }
 
