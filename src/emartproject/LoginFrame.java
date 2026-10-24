@@ -12,7 +12,7 @@ public class LoginFrame extends JFrame {
 
     private static final Color NAVY = new Color(20, 37, 68);
     private static final Color BLUE = new Color(39, 100, 210);
-    private static final Color PALE = new Color(15, 29, 54);
+    private static final Color PALE = new Color(36, 99, 235);
     private static final Color MUTED = new Color(105, 119, 140);
 
     public LoginFrame() {
