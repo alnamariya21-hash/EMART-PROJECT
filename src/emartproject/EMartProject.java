@@ -7,6 +7,8 @@ import java.sql.SQLException;
 public class EMartProject {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
+            UITheme.apply();
+
             String user = System.getenv("EMART_DB_USER");
             if (user == null || user.trim().isEmpty()) {
                 JTextField usernameField = new JTextField("root");
