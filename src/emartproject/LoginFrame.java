@@ -1,6 +1,7 @@
 package emartproject;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.sql.SQLException;
 
@@ -9,68 +10,132 @@ public class LoginFrame extends JFrame {
     private JPasswordField passwordField;
     private JComboBox<String> roleBox;
 
+    private static final Color NAVY = new Color(20, 37, 68);
+    private static final Color BLUE = new Color(39, 100, 210);
+    private static final Color PALE = new Color(242, 246, 252);
+    private static final Color MUTED = new Color(105, 119, 140);
+
     public LoginFrame() {
         setTitle("E-Mart Login");
-        setSize(480, 520);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setMinimumSize(new Dimension(520, 620));
+        setSize(620, 700);
         setLocationRelativeTo(null);
 
-        JPanel background = new JPanel(new GridBagLayout());
-        background.setBackground(new Color(238, 241, 246));
+        JPanel root = new JPanel(new GridBagLayout());
+        root.setBackground(PALE);
+        root.setBorder(new EmptyBorder(24, 20, 24, 20));
 
-        JPanel form = new JPanel();
-        form.setBackground(Color.WHITE);
-        form.setBorder(BorderFactory.createEmptyBorder(30, 35, 30, 35));
-        form.setLayout(new BoxLayout(form, BoxLayout.Y_AXIS));
-        form.setPreferredSize(new Dimension(360, 400));
+        JPanel card = new JPanel();
+        card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
+        card.setBackground(Color.WHITE);
+        card.setBorder(new EmptyBorder(34, 42, 34, 42));
+        card.setPreferredSize(new Dimension(420, 590));
 
-        JLabel title = new JLabel("WELCOME TO E-MART");
-        title.setFont(new Font("SansSerif", Font.BOLD, 25));
+        JPanel brand = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        brand.setOpaque(false);
+        brand.setAlignmentX(Component.LEFT_ALIGNMENT);
+        JLabel mark = new JLabel("E");
+        mark.setOpaque(true);
+        mark.setBackground(BLUE);
+        mark.setForeground(Color.WHITE);
+        mark.setFont(new Font("SansSerif", Font.BOLD, 25));
+        mark.setHorizontalAlignment(SwingConstants.CENTER);
+        mark.setPreferredSize(new Dimension(48, 48));
+        JLabel brandName = new JLabel("  E-MART");
+        brandName.setFont(new Font("SansSerif", Font.BOLD, 23));
+        brandName.setForeground(NAVY);
+        brand.add(mark);
+        brand.add(brandName);
+
+        JLabel title = new JLabel("Welcome back");
+        title.setFont(new Font("SansSerif", Font.BOLD, 27));
+        title.setForeground(NAVY);
         title.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel subtitle = new JLabel("Sign in to continue shopping");
+        subtitle.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        subtitle.setForeground(MUTED);
+        subtitle.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         usernameField = new JTextField();
         passwordField = new JPasswordField();
         roleBox = new JComboBox<>(new String[]{"Customer", "Admin"});
+        styleInput(usernameField);
+        styleInput(passwordField);
+        styleInput(roleBox);
 
-        form.add(title);
-        form.add(Box.createVerticalStrut(28));
-        addField(form, "Username", usernameField);
-        form.add(Box.createVerticalStrut(15));
-        addField(form, "Password", passwordField);
-        form.add(Box.createVerticalStrut(15));
-        addField(form, "Login As", roleBox);
-        form.add(Box.createVerticalStrut(24));
+        card.add(brand);
+        card.add(Box.createVerticalStrut(28));
+        card.add(title);
+        card.add(Box.createVerticalStrut(7));
+        card.add(subtitle);
+        card.add(Box.createVerticalStrut(28));
+        addField(card, "Username", usernameField);
+        card.add(Box.createVerticalStrut(18));
+        addField(card, "Password", passwordField);
+        card.add(Box.createVerticalStrut(18));
+        addField(card, "Sign in as", roleBox);
+        card.add(Box.createVerticalStrut(26));
 
-        JButton loginButton = new JButton("Login");
-        loginButton.setFont(new Font("SansSerif", Font.BOLD, 15));
-        loginButton.setAlignmentX(Component.LEFT_ALIGNMENT);
-        loginButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
+        JButton loginButton = new JButton("Sign In");
+        styleButton(loginButton, BLUE, Color.WHITE);
         loginButton.addActionListener(e -> login());
-        form.add(loginButton);
+        card.add(loginButton);
 
-        form.add(Box.createVerticalStrut(12));
-        JButton registerButton = new JButton("Create New Account");
-        registerButton.setAlignmentX(Component.LEFT_ALIGNMENT);
-        registerButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        card.add(Box.createVerticalStrut(12));
+        JButton registerButton = new JButton("Create a Customer Account");
+        styleButton(registerButton, new Color(238, 244, 255), BLUE);
+        registerButton.setBorder(BorderFactory.createLineBorder(new Color(210, 223, 245)));
         registerButton.addActionListener(e -> new RegisterFrame(this));
-        form.add(registerButton);
+        card.add(registerButton);
 
-        background.add(form);
-        add(background);
+        card.add(Box.createVerticalStrut(20));
+        JLabel footer = new JLabel("Simple shopping. A better experience.");
+        footer.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        footer.setForeground(MUTED);
+        footer.setAlignmentX(Component.CENTER_ALIGNMENT);
+        card.add(footer);
+
+        root.add(card);
+        setContentPane(root);
+        getRootPane().setDefaultButton(loginButton);
         setVisible(true);
     }
 
     private void addField(JPanel panel, String label, JComponent input) {
         JLabel text = new JLabel(label);
         text.setFont(new Font("SansSerif", Font.BOLD, 14));
+        text.setForeground(NAVY);
         text.setAlignmentX(Component.LEFT_ALIGNMENT);
-        input.setFont(new Font("SansSerif", Font.PLAIN, 15));
-        input.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
-        input.setPreferredSize(new Dimension(290, 40));
         input.setAlignmentX(Component.LEFT_ALIGNMENT);
         panel.add(text);
-        panel.add(Box.createVerticalStrut(7));
+        panel.add(Box.createVerticalStrut(8));
         panel.add(input);
+    }
+
+    private void styleInput(JComponent input) {
+        input.setFont(new Font("SansSerif", Font.PLAIN, 15));
+        input.setForeground(NAVY);
+        input.setBackground(Color.WHITE);
+        input.setPreferredSize(new Dimension(330, 43));
+        input.setMaximumSize(new Dimension(Integer.MAX_VALUE, 43));
+        input.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(210, 219, 232)),
+            new EmptyBorder(8, 11, 8, 11)
+        ));
+    }
+
+    private void styleButton(JButton button, Color background, Color foreground) {
+        button.setFont(new Font("SansSerif", Font.BOLD, 14));
+        button.setBackground(background);
+        button.setForeground(foreground);
+        button.setFocusPainted(false);
+        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        button.setAlignmentX(Component.LEFT_ALIGNMENT);
+        button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
+        button.setPreferredSize(new Dimension(330, 46));
+        button.setBorder(BorderFactory.createEmptyBorder(12, 16, 12, 16));
     }
 
     private void login() {
