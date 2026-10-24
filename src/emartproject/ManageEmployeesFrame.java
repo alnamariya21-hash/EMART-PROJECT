@@ -9,11 +9,11 @@ public class ManageEmployeesFrame extends JFrame {
 
     DefaultTableModel model;
     JTable table;
-    JTextField idField, nameField, roleField;
+    JTextField idField, nameField, roleField, salaryField;
 
     public ManageEmployeesFrame() {
         setTitle("E-Mart - Manage Employees");
-        setSize(900, 520);
+        setSize(1000, 560);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
@@ -52,6 +52,7 @@ public class ManageEmployeesFrame extends JFrame {
         idField = new JTextField(15);
         nameField = new JTextField(15);
         roleField = new JTextField(15);
+        salaryField = new JTextField(15);
 
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -71,6 +72,12 @@ public class ManageEmployeesFrame extends JFrame {
 
         gbc.gridy = 5;
         fields.add(roleField, gbc);
+
+        gbc.gridy = 6;
+        fields.add(new JLabel("Salary:"), gbc);
+
+        gbc.gridy = 7;
+        fields.add(salaryField, gbc);
 
         // Compact buttons
         JButton addButton = new JButton("Add");
@@ -95,7 +102,7 @@ public class ManageEmployeesFrame extends JFrame {
             "Employee List"));
 
         model = new DefaultTableModel(
-            new String[]{"ID", "Name", "Role"}, 0
+            new String[]{"ID", "Name", "Role", "Salary"}, 0
         ) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -156,10 +163,11 @@ public class ManageEmployeesFrame extends JFrame {
         String id = idField.getText().trim();
         String name = nameField.getText().trim();
         String role = roleField.getText().trim();
+        String salaryText = salaryField.getText().trim();
 
-        if (id.isEmpty() || name.isEmpty() || role.isEmpty()) {
+        if (id.isEmpty() || name.isEmpty() || role.isEmpty() || salaryText.isEmpty()) {
             JOptionPane.showMessageDialog(this,
-                "Please fill all fields.");
+                "Please fill all fields, including salary.");
             return;
         }
 
@@ -171,7 +179,19 @@ public class ManageEmployeesFrame extends JFrame {
             }
         }
 
-        try { DataStore.addEmployee(id, name, role); }
+        double salary;
+        try {
+            salary = Double.parseDouble(salaryText);
+            if (!Double.isFinite(salary) || salary < 0) {
+                JOptionPane.showMessageDialog(this, "Salary must be a valid non-negative number.");
+                return;
+            }
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Enter a valid salary amount, for example 25000.");
+            return;
+        }
+
+        try { DataStore.addEmployee(id, name, role, salary); }
         catch (SQLException e) { showDatabaseError(e); return; }
 
         refreshTable();
@@ -179,6 +199,7 @@ public class ManageEmployeesFrame extends JFrame {
         idField.setText("");
         nameField.setText("");
         roleField.setText("");
+        salaryField.setText("");
 
         JOptionPane.showMessageDialog(this,
             "Employee added successfully.");
