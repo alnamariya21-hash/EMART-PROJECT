@@ -7,7 +7,9 @@ public class PaymentFrame extends JFrame {
     private final String customerName;
     private final double total;
     private final JFrame billFrame;
-    private final JComboBox<String> methodBox;
+    private final JRadioButton upiOption;
+    private final JRadioButton cashOption;
+    private final JRadioButton cardOption;
     private final JTextField upiField;
     private final JLabel upiLabel;
 
@@ -35,15 +37,27 @@ public class PaymentFrame extends JFrame {
         form.add(amountLabel);
 
         form.add(new JLabel("Select payment method:"));
-        methodBox = new JComboBox<>(new String[]{"UPI", "Cash", "Card"});
-        form.add(methodBox);
+        JPanel methodPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 14, 0));
+        methodPanel.setBackground(Color.WHITE);
+        upiOption = new JRadioButton("UPI", true);
+        cashOption = new JRadioButton("Cash");
+        cardOption = new JRadioButton("Card");
+        ButtonGroup methodGroup = new ButtonGroup();
+        methodGroup.add(upiOption);
+        methodGroup.add(cashOption);
+        methodGroup.add(cardOption);
+        for (JRadioButton option : new JRadioButton[]{upiOption, cashOption, cardOption}) {
+            option.setBackground(Color.WHITE);
+            option.setFont(new Font("SansSerif", Font.PLAIN, 14));
+            methodPanel.add(option);
+            option.addActionListener(e -> updateUpiFields());
+        }
+        form.add(methodPanel);
 
         upiLabel = new JLabel("Enter UPI ID / number:");
         upiField = new JTextField();
         form.add(upiLabel);
         form.add(upiField);
-
-        methodBox.addActionListener(e -> updateUpiFields());
         updateUpiFields();
         main.add(form, BorderLayout.CENTER);
 
@@ -63,7 +77,7 @@ public class PaymentFrame extends JFrame {
     }
 
     private void updateUpiFields() {
-        boolean isUpi = "UPI".equals(methodBox.getSelectedItem());
+        boolean isUpi = upiOption.isSelected();
         upiLabel.setVisible(isUpi);
         upiField.setVisible(isUpi);
         revalidate();
@@ -71,7 +85,7 @@ public class PaymentFrame extends JFrame {
     }
 
     private void completePayment() {
-        String method = (String) methodBox.getSelectedItem();
+        String method = upiOption.isSelected() ? "UPI" : cashOption.isSelected() ? "Cash" : "Card";
 
         if ("UPI".equals(method)) {
             String upi = upiField.getText().trim();
