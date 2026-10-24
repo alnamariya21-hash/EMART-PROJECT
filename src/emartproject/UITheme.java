@@ -134,6 +134,53 @@ public final class UITheme {
         return header;
     }
 
+    /** Give product category dropdowns a cleaner modern appearance. */
+    public static void styleCategoryComboBox(JComboBox<?> combo) {
+        combo.setFont(BASE_FONT.deriveFont(Font.PLAIN, 15f));
+        combo.setForeground(TEXT);
+        combo.setBackground(SURFACE);
+        combo.setFocusable(false);
+        combo.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(BORDER, 1),
+            new EmptyBorder(3, 9, 3, 5)
+        ));
+        combo.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value,
+                    int index, boolean isSelected, boolean cellHasFocus) {
+                JLabel label = (JLabel) super.getListCellRendererComponent(
+                    list, value, index, isSelected, cellHasFocus);
+                if (value instanceof ProductCategory) {
+                    label.setText(((ProductCategory) value).getLabel());
+                }
+                label.setFont(BASE_FONT.deriveFont(Font.PLAIN, 15f));
+                label.setBorder(new EmptyBorder(7, 9, 7, 9));
+                if (isSelected) {
+                    label.setBackground(new Color(219, 234, 254));
+                    label.setForeground(PRIMARY_DARK);
+                } else {
+                    label.setBackground(SURFACE);
+                    label.setForeground(TEXT);
+                }
+                return label;
+            }
+        });
+        combo.setUI(new javax.swing.plaf.basic.BasicComboBoxUI() {
+            @Override
+            protected JButton createArrowButton() {
+                JButton arrow = new JButton("▼");
+                arrow.setFont(new Font("SansSerif", Font.BOLD, 10));
+                arrow.setForeground(Color.WHITE);
+                arrow.setBackground(PRIMARY);
+                arrow.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+                arrow.setFocusPainted(false);
+                arrow.setOpaque(true);
+                return arrow;
+            }
+        });
+        combo.setPreferredSize(new Dimension(220, 42));
+    }
+
     public static void styleButton(JButton button, boolean primary) {
         button.setUI(new javax.swing.plaf.basic.BasicButtonUI());
         button.setFont(BASE_FONT.deriveFont(Font.BOLD, 15f));
