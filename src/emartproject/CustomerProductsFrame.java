@@ -66,7 +66,7 @@ public class CustomerProductsFrame extends JPanel {
             categoryPanel.add(heading, BorderLayout.NORTH);
 
             JScrollPane tableScroll = new JScrollPane(categoryTable);
-            tableScroll.setPreferredSize(new Dimension(850, 120));
+            tableScroll.setPreferredSize(new Dimension(850, (3 * 52) + 26));
             categoryPanel.add(tableScroll, BorderLayout.CENTER);
             categoryPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
             categoryList.add(categoryPanel);
@@ -112,13 +112,14 @@ public class CustomerProductsFrame extends JPanel {
             }
         }
 
-        // Size each table to its contents while keeping empty categories visible.
+        // Keep room for at least three product rows in every category.
+        // Categories with more than three products scroll inside their own table.
         for (ProductCategory category : ProductCategory.values()) {
             JTable categoryTable = categoryTables.get(category);
-            int rows = categoryModels.get(category).getRowCount();
             categoryTable.setPreferredScrollableViewportSize(
-                new Dimension(850, Math.max(52, (rows * 52) + 2))
+                new Dimension(850, (3 * 52) + 2)
             );
+            categoryTable.setFillsViewportHeight(true);
             categoryTable.revalidate();
         }
         categoryList.revalidate();
