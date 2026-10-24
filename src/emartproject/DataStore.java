@@ -69,21 +69,22 @@ public final class DataStore {
     public static void loadEmployees() throws SQLException {
         ArrayList<String[]> found = new ArrayList<>();
         try (Connection conn = Database.connect();
-             PreparedStatement ps = conn.prepareStatement("SELECT id,name,role FROM employees ORDER BY id");
+             PreparedStatement ps = conn.prepareStatement("SELECT id,name,role,salary FROM employees ORDER BY id");
              ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) found.add(new String[]{rs.getString(1), rs.getString(2), rs.getString(3)});
+            while (rs.next()) found.add(new String[]{rs.getString(1), rs.getString(2), rs.getString(3), rs.getBigDecimal(4).toPlainString()});
         }
         employees.clear();
         employees.addAll(found);
     }
 
-    public static void addEmployee(String id, String name, String role) throws SQLException {
+    public static void addEmployee(String id, String name, String role, double salary) throws SQLException {
         try (Connection conn = Database.connect();
              PreparedStatement ps = conn.prepareStatement(
-                 "INSERT INTO employees(id,name,role) VALUES(?,?,?)")) {
+                 "INSERT INTO employees(id,name,role,salary) VALUES(?,?,?,?)")) {
             ps.setString(1, id);
             ps.setString(2, name);
             ps.setString(3, role);
+            ps.setDouble(4, salary);
             ps.executeUpdate();
         }
         loadEmployees();
