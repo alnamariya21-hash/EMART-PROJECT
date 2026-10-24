@@ -60,7 +60,12 @@ public final class Database {
                 + "image_path VARCHAR(1024), CHECK (price >= 0)) ENGINE=InnoDB");
             st.executeUpdate("CREATE TABLE IF NOT EXISTS employees ("
                 + "id VARCHAR(40) PRIMARY KEY, name VARCHAR(150) NOT NULL,"
-                + "role VARCHAR(120) NOT NULL) ENGINE=InnoDB");
+                + "role VARCHAR(120) NOT NULL, salary DECIMAL(12,2) NOT NULL DEFAULT 0.00) ENGINE=InnoDB");
+            try (ResultSet columns = conn.getMetaData().getColumns(null, null, "employees", "salary")) {
+                if (!columns.next()) {
+                    st.executeUpdate("ALTER TABLE employees ADD COLUMN salary DECIMAL(12,2) NOT NULL DEFAULT 0.00");
+                }
+            }
             st.executeUpdate("CREATE TABLE IF NOT EXISTS cart_items ("
                 + "id BIGINT AUTO_INCREMENT PRIMARY KEY, customer VARCHAR(64) NOT NULL,"
                 + "product_id VARCHAR(40) NOT NULL, "
