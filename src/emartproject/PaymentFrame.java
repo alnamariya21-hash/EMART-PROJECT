@@ -58,6 +58,7 @@ public class PaymentFrame extends JFrame {
         cancelButton.addActionListener(e -> dispose());
 
         add(main);
+        UITheme.polishWindow(this);
         setVisible(true);
     }
 
