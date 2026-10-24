@@ -112,7 +112,7 @@ public class LoginFrame extends JFrame {
         JLabel text = new JLabel(label);
         text.setFont(new Font("Segoe UI", Font.BOLD, 15));
         text.setForeground(NAVY);
-        text.setHorizontalAlignment(SwingConstants.RIGHT);
+        text.setHorizontalAlignment(SwingConstants.LEFT);
         text.setAlignmentX(Component.CENTER_ALIGNMENT);
         text.setPreferredSize(new Dimension(370, 22));
         text.setMaximumSize(new Dimension(370, 22));
