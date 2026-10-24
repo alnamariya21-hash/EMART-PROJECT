@@ -49,6 +49,11 @@ public final class Database {
                 + "password_salt VARCHAR(64) NOT NULL, password_hash VARCHAR(128) NOT NULL,"
                 + "full_name VARCHAR(120) NOT NULL DEFAULT '',"
                 + "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB");
+            try (ResultSet columns = conn.getMetaData().getColumns(null, null, "users", "full_name")) {
+                if (!columns.next()) {
+                    st.executeUpdate("ALTER TABLE users ADD COLUMN full_name VARCHAR(120) NOT NULL DEFAULT ''");
+                }
+            }
             st.executeUpdate("CREATE TABLE IF NOT EXISTS products ("
                 + "id VARCHAR(40) PRIMARY KEY, name VARCHAR(200) NOT NULL,"
                 + "price DECIMAL(12,2) NOT NULL, category VARCHAR(24) NOT NULL,"
@@ -116,8 +121,14 @@ public final class Database {
     }
 
     public static void register(String username, char[] rawPassword, String role) throws SQLException {
+        register(username, username, rawPassword, role);
+    }
+
+    public static void register(String username, String fullName, char[] rawPassword, String role) throws SQLException {
         if (username == null || !username.matches("[A-Za-z0-9_.-]{3,64}"))
             throw new SQLException("Username must be 3-64 letters, numbers or _ . -");
+        if (fullName == null || fullName.trim().isEmpty() || fullName.trim().length() > 120)
+            throw new SQLException("Enter your full name (up to 120 characters).");
         if (rawPassword == null || rawPassword.length < 6)
             throw new SQLException("Password must have at least 6 characters.");
         if (!"Admin".equals(role) && !"Customer".equals(role))
@@ -128,11 +139,12 @@ public final class Database {
         String hash = hash(rawPassword, salt);
         try (Connection conn = connect();
              PreparedStatement ps = conn.prepareStatement(
-                 "INSERT INTO users(username,role,password_salt,password_hash) VALUES (?,?,?,?)")) {
+                 "INSERT INTO users(username,role,password_salt,password_hash,full_name) VALUES (?,?,?,?,?)")) {
             ps.setString(1, username);
             ps.setString(2, role);
             ps.setString(3, saltText);
             ps.setString(4, hash);
+            ps.setString(5, fullName.trim());
             ps.executeUpdate();
         }
     }
