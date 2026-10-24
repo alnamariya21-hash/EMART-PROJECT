@@ -64,6 +64,7 @@ public class RegisterFrame extends JFrame {
 
         background.add(form);
         add(background);
+        UITheme.polishWindow(this);
         setVisible(true);
     }
 
