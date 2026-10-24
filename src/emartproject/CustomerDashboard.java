@@ -72,6 +72,7 @@ public class CustomerDashboard extends JFrame {
 
 
 
+        UITheme.polishWindow(this);
         setVisible(true);
     }
 }
