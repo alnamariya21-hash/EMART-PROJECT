@@ -104,7 +104,7 @@ public class CartFrame extends JFrame {
             try {
                 DataStore.CheckoutReceipt receipt = DataStore.checkout();
                 dispose();
-                new BillFrame(receipt.customer, receipt.items, receipt.total);
+                new BillFrame(Database.getFullName(receipt.customer), receipt.items, receipt.total);
                 if (receipt.refreshWarning != null) {
                     JOptionPane.showMessageDialog(null, receipt.refreshWarning,
                         "Checkout completed with a warning", JOptionPane.WARNING_MESSAGE);
