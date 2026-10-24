@@ -83,11 +83,13 @@ public class PaymentFrame extends JFrame {
         }
 
         // This is a demo payment confirmation; it does not transfer real money.
-        String message = "Thank you for shopping, " + customerName + "!\n\n"
+        String message = "E-MART\n\n"
+            + "Payment Successful!\n\n"
+            + "Customer: " + customerName + "\n"
             + String.format("Amount: $%.2f\n", total)
             + "Payment method: " + method + "\n\n"
-            + "Thank you for shopping with E-Mart!";
-        JOptionPane.showMessageDialog(this, message, "Payment Successful",
+            + "Thank you for shopping!";
+        JOptionPane.showMessageDialog(this, message, "E-Mart",
             JOptionPane.INFORMATION_MESSAGE);
 
         if (billFrame != null) {
