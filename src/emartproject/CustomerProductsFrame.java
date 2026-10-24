@@ -16,6 +16,8 @@ public class CustomerProductsFrame extends JPanel {
         new EnumMap<>(ProductCategory.class);
     private final Map<ProductCategory, JTable> categoryTables =
         new EnumMap<>(ProductCategory.class);
+    private final Map<ProductCategory, JPanel> categoryPanels =
+        new EnumMap<>(ProductCategory.class);
     private final JPanel categoryList = new JPanel();
 
     public CustomerProductsFrame(String customerName, boolean standalone) {
@@ -46,6 +48,7 @@ public class CustomerProductsFrame extends JPanel {
 
             categoryModels.put(category, categoryModel);
             categoryTables.put(category, categoryTable);
+            categoryPanels.put(category, categoryPanel);
 
             // Keep the original fields available for compatibility.
             if (table == null) {
@@ -121,10 +124,12 @@ public class CustomerProductsFrame extends JPanel {
 
         // Show a category panel only when it contains at least one product.
         for (ProductCategory category : ProductCategory.values()) {
-            JPanel panel = (JPanel) categoryTables.get(category).getParent()
-                .getParent().getParent().getParent();
-            if (categoryModels.get(category).getRowCount() > 0) {
-                panel.setVisible(true);
+            JPanel panel = categoryPanels.get(category);
+            boolean hasProducts = categoryModels.get(category).getRowCount() > 0;
+            panel.setVisible(hasProducts);
+            int index = categoryList.getComponentZOrder(panel);
+            if (index >= 0 && index + 1 < categoryList.getComponentCount()) {
+                categoryList.getComponent(index + 1).setVisible(hasProducts);
             }
         }
 
