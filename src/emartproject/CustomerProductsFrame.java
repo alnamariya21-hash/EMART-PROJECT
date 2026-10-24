@@ -48,7 +48,6 @@ public class CustomerProductsFrame extends JPanel {
 
             categoryModels.put(category, categoryModel);
             categoryTables.put(category, categoryTable);
-            categoryPanels.put(category, categoryPanel);
 
             // Keep the original fields available for compatibility.
             if (table == null) {
@@ -57,6 +56,7 @@ public class CustomerProductsFrame extends JPanel {
             }
 
             JPanel categoryPanel = new JPanel(new BorderLayout(0, 6));
+            categoryPanels.put(category, categoryPanel);
             categoryPanel.setBackground(Color.WHITE);
             categoryPanel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(220, 228, 238)),
