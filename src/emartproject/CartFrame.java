@@ -105,6 +105,14 @@ public class CartFrame extends JFrame {
                 DataStore.CheckoutReceipt receipt = DataStore.checkout();
                 dispose();
                 new BillFrame(receipt.customer, receipt.items, receipt.total);
+                if (!receipt.getRefreshWarning().isEmpty()) {
+                    JOptionPane.showMessageDialog(null,
+                        "Your checkout was saved successfully, but some screen data could not refresh. "
+                        + "Reopen the relevant screen to reload it.\\n\\n"
+                        + receipt.getRefreshWarning(),
+                        "Checkout completed with refresh warning",
+                        JOptionPane.WARNING_MESSAGE);
+                }
             } catch (SQLException ex) { showDatabaseError(ex); }
         });
 
